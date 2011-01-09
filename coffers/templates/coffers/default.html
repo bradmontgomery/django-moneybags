@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {# --- CREDITS! ------------------ #}
+    {% if credits %}
+        <table>
+        <caption>Credits</caption>
+        <thead>
+            <tr>
+            <th>Date</th>
+            <th><abbr title="Check Number">Ck no.</abbr></th>
+            <th>Description</th>
+            <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for c in credits %}
+            <tr>
+            <td>{{ c.date }}</td>
+            <td>{{ c.check_no }}</td>
+            <td>{{ c.description }}</td>
+            <td>{{ c.amount }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% endif %}
+    
+    {# --- DEBITS! ------------------ #}
+    {% if debits %}
+        <table>
+        <caption>Debits</caption>
+        <thead>
+            <tr>
+            <th>Date</th>
+            <th class="optional"><abbr title="Check Number">Ck no.</abbr></th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th class="optional">Recurring?</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for d in debits %}
+            <tr>
+            <td>{{ d.date }}</td>
+            <td>{{ d.check_no }}</td>
+            <td>{{ d.description }}</td>
+            <td>{{ d.amount }}</td>
+            <td>{{ d.recurring|yesno }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
+

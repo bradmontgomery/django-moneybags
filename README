@@ -1,0 +1,16 @@
+==============
+django-coffers
+==============
+
+About
+-----
+This app aims to make it easy to ``manually`` track personal finances.
+It is very much a work in progress.
+
+Installation
+------------
+TODO: write this.
+
+License
+-------
+This work is availble under the MIT License.  See the LICENSE file.
