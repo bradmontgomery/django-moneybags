@@ -8,9 +8,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
+from django.template.defaultfilters import slugify
 
 from models import Account, Transaction, RecurringTransaction
-from forms import AccountForm, TransactionForm, modelform_handler
+from forms import AccountForm, TransactionForm, RecurringTransactionForm, modelform_handler
 
 @login_required
 def new_transaction(request, account_slug):
@@ -18,10 +19,10 @@ def new_transaction(request, account_slug):
     form, object = modelform_handler(request, TransactionForm, commit=False)
     if object:
         object.account = account
-        #TODO: if this is recurring, redirect to the recurring info form
-
         object.save()
-        return redirect(object)
+        if object.recurring:
+            return redirect(object.get_recurring_transaction_url())
+        return redirect(object) # account detail
 
     data = {'account':account, 'form':form, 'object':object }
     return render_to_response('coffers/new_transaction.html', 
@@ -29,18 +30,20 @@ def new_transaction(request, account_slug):
                                context_instance=RequestContext(request))
 
 @login_required
-def recurring_transaction(request, object_id):
+def recurring_transaction(request, account_slug, transaction_id):
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
-    recurring_transaction = get_object_or_404(RecurringTransaction, account=account)
+    transaction = get_object_or_404(Transaction, pk=transaction_id, account=account)
+    recurring_transaction = transaction.get_recurring_transaction()
 
-    #TODO: finish this, make sure correct info is saved, then redirect to Account details.
-    #form, object = modelform_handler(request, RecurringTransactionForm, commit=False)
-    #if object:
-    #
-    #    object.save()
-    #    return redirect(object)
+    if recurring_transaction:
+        form, object = modelform_handler(request, RecurringTransactionForm, instance=recurring_transaction, commit=True)
+        if object:
+            return redirect(object)
 
-    #data = {'account':account, 'form':form, 'object':object }
+        data = {'account':account, 'form':form, 'transaction':transaction  }
+    else:
+        raise Http404
+
     return render_to_response('coffers/recurring_transaction.html', 
                                data,
                                context_instance=RequestContext(request))
@@ -78,7 +81,7 @@ def account_detail(request, account_slug):
     since = timedelta(days=-30) + today
 
     transactions = Transaction.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
-    recurring_transactions = RecurringTransaction.objects.filter(last_paid_on__lt=today)
+    recurring_transactions = RecurringTransaction.objects.filter(due_date__gt=today)
     
     data = {'account':account, 'transactions': transactions,
             'recurring_transactions':recurring_transactions,

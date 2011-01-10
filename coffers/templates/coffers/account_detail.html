@@ -2,6 +2,19 @@
 
 {% block content %}
 
+    {% if recurring_transactions %}
+        {% for rt in recurring_transactions %}
+            <p style="border-bottom: 1px solid #aaa">
+            Description: {{ rt.description }}<br/>
+            Amount: {{ rt.amount }}<br/>
+            Frequency: {{ rt.get_frequency_display }}<br/>
+            Start: {{ rt.frequency_start_date }}<br/>
+            Last Transaction Date: {{ rt.last_transaction_date }}<br/>
+            Due: {{ rt.due_date }}<br/>
+            </p>
+        {% endfor %}    
+    {% endif %}
+
     {% if transactions %}
         <table>
         <caption>{{ account }}: ${{ balance }}</caption>
@@ -24,7 +37,7 @@
             <td>{{ t.id }}</td>
             <td>{% if t.is_credit %}Credit{% else %}Debit{% endif %}</td>
             <td>{{ t.date }}</td>
-            <td>{{ t.check_no }}</td>
+            <td>{% if t.check_no %}{{ t.check_no }}{% else %}{% endif %}</td>
             <td>{{ t.description }}</td>
             <td>{% if t.is_credit %}({{ t.amount }}){% else %}{{ t.abs_amount }}{% endif %}</td>
             <td>{{ t.recurring|yesno }}</td>
@@ -35,7 +48,13 @@
         </tbody>
         </table>
     {% else %}
-        <p>You currently have no transactions.</p>
+        {% if balance %}
+            {# There have obviously been *some* transactions, just not recently #}
+            <h2>{{ account }}: ${{ balance }}</h2>
+            <p>You don't have any recent transactions.</p>
+        {% else %}
+            <p>You currently have no transactions.</p>
+        {% endif %}
     {% endif %}
     <p style="margin-top: 1em; text-align: right;">&rarr; <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a>.</p>
 

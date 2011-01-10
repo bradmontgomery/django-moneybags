@@ -1,5 +1,5 @@
 from django import forms
-from models import Account, Transaction
+from models import Account, Transaction, RecurringTransaction
 
 class AccountForm(forms.ModelForm):
     class Meta:
@@ -11,7 +11,12 @@ class TransactionForm(forms.ModelForm):
         model = Transaction
         exclude = ('account', 'updated_on')
 
-def modelform_handler(request, form_klass, commit=True):
+class RecurringTransactionForm(forms.ModelForm):
+    class Meta:
+        model = RecurringTransaction
+        fields = ('frequency_start_date', 'frequency', )
+
+def modelform_handler(request, form_klass, instance=None, commit=True):
     """
     A convenience function to handle ModelForm creation and
     Validation in a View.
@@ -19,6 +24,7 @@ def modelform_handler(request, form_klass, commit=True):
     Parameters:
     * ``request`` - the HttpRequest object
     * ``form_klass`` - a subclass of ModelForm
+    * ``instance`` - an object that gets passed into the ``form_klass``
     * ``commit`` - True or False; this is passed into the 
                    ``form_klass``'s ``save`` method.
 
@@ -29,11 +35,18 @@ def modelform_handler(request, form_klass, commit=True):
     object = None
     
     if request.method == "POST":
-        form = form_klass(request.POST)
+        if instance:
+            form = form_klass(request.POST, instance=instance)
+        else:
+            form = form_klass(request.POST)
+        
         if form.is_valid():
             object = form.save(commit=commit)
     else:
-        form = form_klass()
+        if instance:
+            form = form_klass(instance=instance)
+        else:
+            form = form_klass()
     
     return (form, object)
 

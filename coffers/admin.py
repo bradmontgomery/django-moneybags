@@ -13,8 +13,8 @@ class TransactionAdmin(admin.ModelAdmin):
     search_fields = ('description', 'account__name')
 
 class RecurringTransactionAdmin(admin.ModelAdmin):
-    date_hierarchy = 'last_paid_on'
-    list_display = ('description', 'last_paid_on', 'frequency', 'desc_slug', )
+    date_hierarchy = 'last_transaction_date'
+    list_display = ('due_date', 'description', 'desc_slug', 'frequency', 'frequency_start_date', 'last_transaction_date', )
     search_fields = ('description', )
 
 admin.site.register(models.Account, AccountAdmin)

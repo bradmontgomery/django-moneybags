@@ -8,6 +8,7 @@
             <li><a href="{{ account.get_absolute_url }}">{{ account }}</a></li>
         {% endfor %}
         </ul>
+        <p style="margin-top: 1em; text-align: right;">&rarr; <a href="{% url coffers-accounts-create %}">Create Another Account</a>!</p>
     {% else %}
         <p>You haven't set up any Accounts yet.  <a href="{% url coffers-accounts-create %}">Create One</a>!</p>
     {% endif %}

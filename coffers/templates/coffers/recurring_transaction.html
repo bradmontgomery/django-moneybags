@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ account }}: Recurring Transaction</h1>
+
+    <p>
+    You're updating a <em>Recurring {{ transaction.get_transaction_type_display }}</em> called <strong>{{ transaction.description }}</strong>. This 
+    will automatically show up in your account as a <em>Pending</em> transaction after the designated amount of time.
+    </p>
+    
+    {% if form %}
+    <form action="{{ transaction.get_recurring_transaction_url }}" method="post">{% csrf_token %}
+    <fieldset><legend>{{ transaction }}</legend>
+    <ul>
+    {{ form.as_ul }}
+    <li><input type="submit" value="Save"/></li>
+    </ul>
+    </fieldset>
+    </form>
+    {% endif %}
+{% endblock %}
+

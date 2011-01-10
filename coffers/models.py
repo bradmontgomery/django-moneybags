@@ -62,6 +62,9 @@ class Transaction(models.Model):
     
     def get_absolute_url(self):
         return self.account.get_absolute_url()
+    
+    def get_recurring_transaction_url(self):
+        return reverse('coffers-recurring-transaction', args=[self.account.slug, self.id])
 
     def save(self, *args, **kwargs):
         """ 
@@ -74,19 +77,30 @@ class Transaction(models.Model):
         self._create_or_update_recurring_transaction()
 
     def _create_or_update_recurring_transaction(self):
-        self._recurring_transaction_created = False  # NOTE: not sure about doing it this way... ?
+        """
+        If this transaction is recurring, this method will fetch the corresponding
+        ``RecurringTransaction`` object, if it exists.  If the ``RecurringTrasaction`` 
+        object does not exist, it will be created.
+
+        In either case, the ``RecurringTransaction`` instance is updated with values
+        from this ``Transaction``.
+
+        This method returns a tuple containing 2 objects: 
+        1. An instance of ``RecurringTransaction``
+        2. A boolean value indicating whether or not the above object was created
+        """
         if self.recurring:
             desc_slug = slugify(self.description)
             try:
-                rd = RecurringTransaction.objects.get(desc_slug=desc_slug, account=self.account)
+                rt = RecurringTransaction.objects.get(desc_slug=desc_slug, account=self.account)
             except RecurringTransaction.DoesNotExist:
-                rd = RecurringTransaction(desc_slug=desc_slug, account=self.account)
-                self._recurring_transaction_created = True # .....
-
-            rd.description = self.description
-            rd.amount = self.amount
-            rd.last_paid_on = self.date
-            rd.save()
+                rt = RecurringTransaction(desc_slug=desc_slug, account=self.account)
+                rt.frequency_start_date = self.date
+           
+            rt.description = self.description
+            rt.amount = self.amount
+            rt.last_transaction_date = self.date
+            rt.save()
 
     def is_credit(self):    
         return self.transaction_type > 0
@@ -94,6 +108,22 @@ class Transaction(models.Model):
     def abs_amount(self):
         return abs(self.amount)
 
+    def get_recurring_transaction(self):
+        rt = None 
+        if self.recurring: 
+            try:
+                rt = RecurringTransaction.objects.get(desc_slug=slugify(self.description), account=self.account)
+            except RecurringTransaction.DoesNotExist:
+                # Ugh... create it?
+                rt = RecurringTransaction(desc_slug=slugify(self.description), account=self.account)
+                rt.description = self.description
+                rt.amount = self.amount
+                rt.last_transaction_date = self.date
+                rt.frequency_start_date = self.date
+                rt.save()
+        
+        return rt
+            
 class RecurringTransaction(models.Model):
     """
     This model provides a way to track recurring transactions. Note
@@ -111,21 +141,24 @@ class RecurringTransaction(models.Model):
         ('y', 'Yearly'),
         ('q', 'Quarterly'),
     )
-    description = models.CharField(max_length=255)
-    desc_slug = models.SlugField(max_length=255)
-    amount = models.DecimalField(max_digits=AMOUNT_MAX_DIGITS, decimal_places=AMOUNT_DECIMAL_PLACES)
-    account = models.ForeignKey(Account)
-    last_paid_on = models.DateField()
+    description = models.CharField(max_length=255, help_text="This should match the description from the Transaction")
+    desc_slug = models.SlugField(max_length=255, help_text="A sluggified version of the description")
+    amount = models.DecimalField(max_digits=AMOUNT_MAX_DIGITS, decimal_places=AMOUNT_DECIMAL_PLACES, help_text="Amount to be paid")
+    account = models.ForeignKey(Account, help_text="The account in which this belongs")
     frequency = models.CharField(max_length=1, choices=FREQUENCY_CHOICES)
+    frequency_start_date = models.DateField(help_text="The date from which the frequency should be calculated")
+    last_transaction_date = models.DateField(help_text="The date on which the last transaction occurred")
+    due_date = models.DateField(help_text="Automatically Generated from the Frequency and Frequency Start Date")
     updated_on = models.DateTimeField(auto_now=True)
-
+    ###TODO: TYPE!?  credit or debit?
+   
     def __unicode__(self):
-        return u'%s: last paid on %s' % (self.description, self.last_paid_on)
+        return u'%s: %s - last transaction date %s' % (self.account.name, self.description, self.last_transaction_date)
 
     class Meta:
-        ordering = ['-last_paid_on', 'account', 'description']
+        ordering = ['-last_transaction_date', 'account', 'description']
         unique_together = ['account', 'desc_slug']
-   
+    
     def get_absolute_url(self):
         return self.account.get_absolute_url()
 
@@ -134,4 +167,23 @@ class RecurringTransaction(models.Model):
         Just ``slugify`` the Description.
         """
         self.desc_slug = slugify(self.description)
+        self.due_date = self.get_due_date() or self.frequency_start_date or self.last_transaction_date
         super(RecurringTransaction, self).save(*args, **kwargs)
+
+    def get_due_date(self):
+        """ Calculate the due date for this recurring transaction """
+        new_date = None
+        if self.frequency == 'd':
+            new_date = self.frequency_start_date + datetime.timedelta(days=1)
+        elif self.frequency == 'w':
+            new_date = self.frequency_start_date + datetime.timedelta(days=7)
+        elif self.frequency == 'b':
+            new_date = self.frequency_start_date + datetime.timedelta(days=14)
+        elif self.frequency == 'm':
+            new_date = self.frequency_start_date + datetime.timedelta(365/12)
+        elif self.frequency == 'y':
+            new_date = self.frequency_start_date + datetime.timedelta(days=365)
+        elif self.frequency == 'q':
+            new_date = self.frequency_start_date + datetime.timedelta(days=90)
+        
+        return new_date
