@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Create an Account</h1>
+    {% if form %}
+    <form action="{% url coffers-accounts-create %}" method="post">{% csrf_token %}
+    <fieldset><legend>New Account</legend>
+    <ul>
+    {{ form.as_ul }}
+    <li><input type="submit" value="Create Account"/></li>
+    </ul>
+    </fieldset>
+    </form>
+    {% endif %}
+{% endblock %}
+

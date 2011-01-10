@@ -31,6 +31,9 @@ class Account(models.Model):
         self.slug = slugify(self.name)
         super(Account, self).save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        return reverse('coffers-account-detail', args=[self.slug,])
+
 class Transaction(models.Model):
     """
     An abstract class representing a monetary transaction.
@@ -51,12 +54,14 @@ class Transaction(models.Model):
         abstract = True
     
     def _create_or_update_recurring_transaction(self):
+        self._recurring_transaction_created = False  # NOTE: not sure about doing it this way... ?
         if self.recurring:
             desc_slug = slugify(self.description)
             try:
                 rd = RecurringTransaction.objects.get(desc_slug=desc_slug, account=self.account)
             except RecurringTransaction.DoesNotExist:
                 rd = RecurringTransaction(desc_slug=desc_slug, account=self.account)
+                self._recurring_transaction_created = True # .....
 
             rd.description = self.description
             rd.amount = self.amount

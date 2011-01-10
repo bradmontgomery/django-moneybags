@@ -6,27 +6,64 @@ from django.contrib.auth.decorators import login_required
 #from django.db.models import Q
 #from django.forms.formsets import formset_factory
 from django.http import Http404
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 
-from models import Credit, Debit, RecurringTransaction
+from models import Account, Credit, Debit, RecurringTransaction
+from forms import AccountForm, modelform_handler
 
 @login_required
-def default(request):
+def account_list(request):
+    accounts = Account.objects.filter(owner=request.user)
+    return render_to_response('coffers/account_list.html', 
+                               {'accounts':accounts}, 
+                               context_instance=RequestContext(request))
+
+@login_required
+def account_create(request):
+    """ create a new account """ 
+    form, object = modelform_handler(request, AccountForm, commit=False)
+    if object:
+        object.owner = request.user
+        object.save()
+        return redirect(object)
+    return render_to_response('coffers/account_create.html', 
+                               {'form':form}, 
+                               context_instance=RequestContext(request))
+
+@login_required
+def account_detail(request, account_slug):
     """
     List "recent" debits, credits, and any "upcoming" recurring transactions
     """
+    account = get_object_or_404(Account, slug=account_slug, owner=request.user)
+
     today = date.today()
     since = timedelta(days=-30) + today
-    credits = Credit.objects.filter(date__gte=since, owner=request.user)
-    debits = Debit.objects.filter(date__gte=since, owner=request.user)
-    recurring_debits = RecurringTransaction.objects.filter(last_paid_on__lt=today)
+    credits = Credit.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
+    debits = Debit.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
+    recurring_transactions = RecurringTransaction.objects.filter(last_paid_on__lt=today)
 
-    data = {'credits':credits, 'debits':debits, 
-            'recurring_debits':recurring_debits,
-            'today':today, 'since':since 
+    total_credits = sum([t.amount for t in credits])
+    total_debits = sum([t.amount for t in debits])
+    balance = total_credits - total_debits
+    
+    # List both Credits & Debits in a single data structure organized by date
+    transactions = []
+    for t in list(credits) + list(debits):
+        trans = {'recurring':False, 'credit': False, 'object':None, 'date':None}
+        trans['object'] = t
+        trans['date'] = t.date
+        if t.__class__ == Credit:
+            trans['credit'] = True
+        transactions.append(trans)
+
+    
+    data = {'account':account, 'transactions': transactions,
+            'recurring_transactions':recurring_transactions,
+            'today':today, 'since':since, 'balance':balance
            }
-    return render_to_response('coffers/default.html', 
+    return render_to_response('coffers/account_detail.html', 
                               data,
                               context_instance=RequestContext(request))
 

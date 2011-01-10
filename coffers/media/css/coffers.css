@@ -1,3 +1,8 @@
 /* selectors defined in the django-coffers templates */
 th.optional { font-weight: normal; }
+td { margin: 0; padding: .5em; background-color: transparent;}
+tr.debit { background-color: white; }
+tr.credit { background-color: #efe; }
+tr.pending { color: #999; }
+tr.recurring { font-weight: bold; }
 

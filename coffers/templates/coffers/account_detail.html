@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if transactions %}
+        <table>
+        <caption>{{ account }}: ${{ balance }}</caption>
+        <thead>
+            <tr>
+            <th>id</th>
+            <th>Type</th>
+            <th>Date</th>
+            <th><abbr title="Check Number">Ck no.</abbr></th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th class="optional">Recurring?</th>
+            <th>Pending</th>
+            <th>Updated On</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in transactions|dictsortreversed:"date" %}
+            <tr class="transaction {% if t.credit %}credit{% else %}debit{% endif %} {% if t.object.recurring %}recurring{% endif %} {% if t.object.pending %}pending{% endif %}">
+            <td>{{ t.object.id }}</td>
+            <td>{% if t.credit %}Credit{% else %}Debit{% endif %}</td>
+            <td>{{ t.object.date }}</td>
+            <td>{{ t.object.check_no }}</td>
+            <td>{{ t.object.description }}</td>
+            <td>{% if t.credit %}({{ t.object.amount }}){% else %}{{ t.object.amount }}{% endif %}</td>
+            <td>{{ t.object.recurring|yesno }}</td>
+            <td>{{ t.object.pending|yesno }}</td>
+            <td>{{ t.object.updated_on }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <p>You currently have no transactions.</p>
+    {% endif %}
+
+{% endblock %}
+

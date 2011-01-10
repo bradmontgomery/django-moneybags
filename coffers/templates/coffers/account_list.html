@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Accounts</h1>
+    {% if accounts %}
+        <ul>
+        {% for account in accounts %}
+            <li><a href="{{ account.get_absolute_url }}">{{ account }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't set up any Accounts yet.  <a href="{% url coffers-accounts-create %}">Create One</a>!</p>
+    {% endif %}
+    
+{% endblock %}
+
