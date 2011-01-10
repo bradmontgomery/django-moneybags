@@ -19,17 +19,17 @@
             </tr>
         </thead>
         <tbody>
-        {% for t in transactions|dictsortreversed:"date" %}
-            <tr class="transaction {% if t.credit %}credit{% else %}debit{% endif %} {% if t.object.recurring %}recurring{% endif %} {% if t.object.pending %}pending{% endif %}">
-            <td>{{ t.object.id }}</td>
-            <td>{% if t.credit %}Credit{% else %}Debit{% endif %}</td>
-            <td>{{ t.object.date }}</td>
-            <td>{{ t.object.check_no }}</td>
-            <td>{{ t.object.description }}</td>
-            <td>{% if t.credit %}({{ t.object.amount }}){% else %}{{ t.object.amount }}{% endif %}</td>
-            <td>{{ t.object.recurring|yesno }}</td>
-            <td>{{ t.object.pending|yesno }}</td>
-            <td>{{ t.object.updated_on }}</td>
+        {% for t in transactions %}
+            <tr class="transaction {% if t.is_credit %}credit{% else %}debit{% endif %} {% if t.recurring %}recurring{% endif %} {% if t.pending %}pending{% endif %}">
+            <td>{{ t.id }}</td>
+            <td>{% if t.is_credit %}Credit{% else %}Debit{% endif %}</td>
+            <td>{{ t.date }}</td>
+            <td>{{ t.check_no }}</td>
+            <td>{{ t.description }}</td>
+            <td>{% if t.is_credit %}({{ t.amount }}){% else %}{{ t.abs_amount }}{% endif %}</td>
+            <td>{{ t.recurring|yesno }}</td>
+            <td>{{ t.pending|yesno }}</td>
+            <td>{{ t.updated_on }}</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -37,6 +37,7 @@
     {% else %}
         <p>You currently have no transactions.</p>
     {% endif %}
+    <p style="margin-top: 1em; text-align: right;">&rarr; <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a>.</p>
 
 {% endblock %}
 

@@ -36,14 +36,19 @@ class Account(models.Model):
 
 class Transaction(models.Model):
     """
-    An abstract class representing a monetary transaction.
+    This class represents a monetary transaction.
     """
+    TRANSACTION_TYPE = (
+        (1, 'Credit'),
+        (-1, 'Debit'),
+    )
     date = models.DateField(help_text="The Date of this transaction")
     check_no = models.PositiveIntegerField(blank=True, null=True, help_text="Optional: Check Number")
     description = models.CharField(max_length=255, help_text="Description for this Transaction")
     amount = models.DecimalField(max_digits=AMOUNT_MAX_DIGITS, decimal_places=AMOUNT_DECIMAL_PLACES, help_text="Amount of this Transaction")
     recurring = models.BooleanField(blank=True, default=False, help_text="Is this a Recurring Transaction")
     pending = models.BooleanField(blank=True, default=True, help_text="Is this transaction still pending?")
+    transaction_type = models.IntegerField(choices=TRANSACTION_TYPE)
     account = models.ForeignKey(Account)
     updated_on = models.DateTimeField(auto_now=True)
 
@@ -51,8 +56,23 @@ class Transaction(models.Model):
         return u'%s on %s: %s' % (self.description, self.date, self.amount)
 
     class Meta:
-        abstract = True
+        ordering = ['-date', ]
+        verbose_name = 'Transaction'
+        verbose_name_plural = 'Transaction'
     
+    def get_absolute_url(self):
+        return self.account.get_absolute_url()
+
+    def save(self, *args, **kwargs):
+        """ 
+        Before saving an object, we set the sign of the amount based on the
+        transaction type. We then create or update a RecurringTransaction 
+        if neccessaryl
+        """
+        self.amount = self.amount * self.transaction_type 
+        super(Transaction, self).save(*args, **kwargs)
+        self._create_or_update_recurring_transaction()
+
     def _create_or_update_recurring_transaction(self):
         self._recurring_transaction_created = False  # NOTE: not sure about doing it this way... ?
         if self.recurring:
@@ -68,27 +88,11 @@ class Transaction(models.Model):
             rd.last_paid_on = self.date
             rd.save()
 
-class Credit(Transaction):
-    class Meta:
-        ordering = ['-date', ]
-        verbose_name = 'Credit'
-        verbose_name_plural = 'Credits'
+    def is_credit(self):    
+        return self.transaction_type > 0
     
-    def save(self, *args, **kwargs):
-        """ Create or Update a Recurring Credit """
-        super(Credit, self).save(*args, **kwargs)
-        self._create_or_update_recurring_transaction()
-
-class Debit(Transaction):
-    class Meta:
-        ordering = ['-date', ]
-        verbose_name = 'Debit'
-        verbose_name_plural = 'Debits'
-    
-    def save(self, *args, **kwargs):
-        """ Create or Update a Recurring Debit """
-        super(Debit, self).save(*args, **kwargs)
-        self._create_or_update_recurring_transaction()
+    def abs_amount(self):
+        return abs(self.amount)
 
 class RecurringTransaction(models.Model):
     """
@@ -121,7 +125,10 @@ class RecurringTransaction(models.Model):
     class Meta:
         ordering = ['-last_paid_on', 'account', 'description']
         unique_together = ['account', 'desc_slug']
-    
+   
+    def get_absolute_url(self):
+        return self.account.get_absolute_url()
+
     def save(self, *args, **kwargs):
         """
         Just ``slugify`` the Description.

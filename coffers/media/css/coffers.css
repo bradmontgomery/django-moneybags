@@ -6,3 +6,9 @@ tr.credit { background-color: #efe; }
 tr.pending { color: #999; }
 tr.recurring { font-weight: bold; }
 
+fieldset { border: 1px solid #aaa; padding: .5em;  }
+fieldset legend { padding: .25em; border: 1px solid #aaa; }
+fieldset ul li label { width: 100px; display: block; float: left;}
+fieldset ul li { padding: .25em 0; clear: both; }
+
+fieldset ul.errorlist { padding: .25em; border: 1px solid #faa; background-color: #fee; color: #800; margin: .25em 0; }

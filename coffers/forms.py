@@ -1,10 +1,15 @@
 from django import forms
-from models import Account, Credit, Debit
+from models import Account, Transaction
 
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
         exclude = ('owner', 'slug', )
+
+class TransactionForm(forms.ModelForm):
+    class Meta:
+        model = Transaction
+        exclude = ('account', 'updated_on')
 
 def modelform_handler(request, form_klass, commit=True):
     """
