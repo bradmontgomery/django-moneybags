@@ -16,6 +16,13 @@ class RecurringTransactionForm(forms.ModelForm):
         model = RecurringTransaction
         fields = ('frequency_start_date', 'frequency', )
 
+class TransactionCheckBoxForm(forms.Form):
+    """ 
+    This is a form used to provide a general purpose ``checkbox`` widget for a ``Transaction``.
+    """
+    value = forms.BooleanField(required=False)
+    object_id = forms.IntegerField(required=True, widget=forms.HiddenInput)
+
 def modelform_handler(request, form_klass, instance=None, commit=True):
     """
     A convenience function to handle ModelForm creation and

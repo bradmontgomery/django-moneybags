@@ -4,14 +4,14 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 #from django.core.paginator import Paginator, InvalidPage, EmptyPage
 #from django.db.models import Q
-#from django.forms.formsets import formset_factory
+from django.forms.formsets import formset_factory
 from django.http import Http404
 from django.shortcuts import render_to_response, get_object_or_404, redirect
 from django.template import RequestContext
 from django.template.defaultfilters import slugify
 
 from models import Account, Transaction, RecurringTransaction
-from forms import AccountForm, TransactionForm, RecurringTransactionForm, modelform_handler
+from forms import AccountForm, TransactionForm, TransactionCheckBoxForm, RecurringTransactionForm, modelform_handler
 
 @login_required
 def new_transaction(request, account_slug):
@@ -83,10 +83,26 @@ def account_detail(request, account_slug):
     transactions = Transaction.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
     recurring_transactions = RecurringTransaction.objects.filter(due_date__gte=today)
     
+    ##TODO: Create a FormSet using the TransactionCheckBoxForm for each Transaction listed.
+    TransactionFormSet = formset_factory(TransactionCheckBoxForm, extra=0)
+    initial_data = [{'value':False, 'object_id':t.id} for t in transactions]
+    formset = TransactionFormSet(initial=initial_data)
+
     data = {'account':account, 'transactions': transactions,
             'recurring_transactions':recurring_transactions,
-            'today':today, 'since':since, 'balance':balance
+            'today':today, 'since':since, 'balance':balance,
+            'formset':formset, 
            }
     return render_to_response('coffers/account_detail.html', 
                               data,
                               context_instance=RequestContext(request))
+
+@login_required
+def update_pending(request, account_slug):
+    """ Update pending transactions, then redirect to account detail """ 
+    account = get_object_or_404(Account, slug=account_slug, owner=request.user)
+    ##TODO: Handle POST from the FormSet created in account_detail
+    
+    ## redirect to account_detail
+    return redirect(account)
+

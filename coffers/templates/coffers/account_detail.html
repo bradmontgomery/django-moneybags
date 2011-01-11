@@ -16,6 +16,7 @@
     {% endif %}
 
     {% if transactions %}
+        {{ formset.managment_form }}
         <table>
         <caption>{{ account }}: ${{ balance }}</caption>
         <thead>
@@ -34,7 +35,16 @@
         <tbody>
         {% for t in transactions %}
             <tr class="transaction {% if t.is_credit %}credit{% else %}debit{% endif %} {% if t.recurring %}recurring{% endif %} {% if t.pending %}pending{% endif %}">
-            <td>{{ t.id }}</td>
+            <td>
+                ({{ t.id }})
+                {% for form in formset.forms %}
+                    {% ifequal form.initial.object_id t.id %}
+                        {% for field in form %}
+                            {{ field }}
+                        {% endfor %}
+                    {% endifequal %}
+                {% endfor %}
+            </td>
             <td>{% if t.is_credit %}Credit{% else %}Debit{% endif %}</td>
             <td>{{ t.date }}</td>
             <td>{% if t.check_no %}{{ t.check_no }}{% else %}{% endif %}</td>
