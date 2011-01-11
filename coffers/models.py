@@ -48,7 +48,7 @@ class Transaction(models.Model):
     amount = models.DecimalField(max_digits=AMOUNT_MAX_DIGITS, decimal_places=AMOUNT_DECIMAL_PLACES, help_text="Amount of this Transaction")
     recurring = models.BooleanField(blank=True, default=False, help_text="Is this a Recurring Transaction")
     pending = models.BooleanField(blank=True, default=True, help_text="Is this transaction still pending?")
-    transaction_type = models.IntegerField(choices=TRANSACTION_TYPE)
+    transaction_type = models.IntegerField(choices=TRANSACTION_TYPE, help_text="The Type of Transaction")
     account = models.ForeignKey(Account)
     updated_on = models.DateTimeField(auto_now=True)
 
@@ -92,9 +92,9 @@ class Transaction(models.Model):
         if self.recurring:
             desc_slug = slugify(self.description)
             try:
-                rt = RecurringTransaction.objects.get(desc_slug=desc_slug, account=self.account)
+                rt = RecurringTransaction.objects.get(desc_slug=desc_slug, account=self.account, transaction_type=self.transaction_type)
             except RecurringTransaction.DoesNotExist:
-                rt = RecurringTransaction(desc_slug=desc_slug, account=self.account)
+                rt = RecurringTransaction(desc_slug=desc_slug, account=self.account, transaction_type=self.transaction_type)
                 rt.frequency_start_date = self.date
            
             rt.description = self.description
@@ -112,10 +112,10 @@ class Transaction(models.Model):
         rt = None 
         if self.recurring: 
             try:
-                rt = RecurringTransaction.objects.get(desc_slug=slugify(self.description), account=self.account)
+                rt = RecurringTransaction.objects.get(desc_slug=slugify(self.description), account=self.account, transaction_type=self.transaction_type)
             except RecurringTransaction.DoesNotExist:
                 # Ugh... create it?
-                rt = RecurringTransaction(desc_slug=slugify(self.description), account=self.account)
+                rt = RecurringTransaction(desc_slug=slugify(self.description), account=self.account, transaction_type=self.transaction_type)
                 rt.description = self.description
                 rt.amount = self.amount
                 rt.last_transaction_date = self.date
@@ -124,6 +124,10 @@ class Transaction(models.Model):
         
         return rt
             
+class RecurringTransactionManager(models.Manager):
+    def due_today(self):
+        return self.filter(due_date=datetime.date.today())
+
 class RecurringTransaction(models.Model):
     """
     This model provides a way to track recurring transactions. Note
@@ -148,9 +152,10 @@ class RecurringTransaction(models.Model):
     frequency = models.CharField(max_length=1, choices=FREQUENCY_CHOICES)
     frequency_start_date = models.DateField(help_text="The date from which the frequency should be calculated")
     last_transaction_date = models.DateField(help_text="The date on which the last transaction occurred")
+    transaction_type = models.IntegerField(choices=Transaction.TRANSACTION_TYPE, help_text="The Type of Transaction")
     due_date = models.DateField(help_text="Automatically Generated from the Frequency and Frequency Start Date")
     updated_on = models.DateTimeField(auto_now=True)
-    ###TODO: TYPE!?  credit or debit?
+    
    
     def __unicode__(self):
         return u'%s: %s - last transaction date %s' % (self.account.name, self.description, self.last_transaction_date)
@@ -187,3 +192,22 @@ class RecurringTransaction(models.Model):
             new_date = self.frequency_start_date + datetime.timedelta(days=90)
         
         return new_date
+
+    objects = RecurringTransactionManager()
+
+def create_transactions_due_today():
+    """
+    Create ``Transaction`` objects for all of the ``RecurringTransaction``'s that are due today
+    This should be run as a a scheduled task.
+    """
+    for rt in RecurringTransaction.objects.due_today():
+        # Make sure it doesn't already exist!
+        if not Transaction.objects.filter(date=rt.due_date, description=rt.description, amount=rt.amount, recurring=True, account=rt.account, transaction_type=rt.transaction_type).count():
+            new_trans = Transaction(date=rt.due_date, account=rt.account)
+            new_trans.description=rt.description
+            new_trans.amount=rt.amount
+            new_trans.recurring=True
+            new_trans.pending=True
+            new_trans.transaction_type=rt.transaction_type
+            new_trans.save()
+

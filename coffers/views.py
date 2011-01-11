@@ -81,7 +81,7 @@ def account_detail(request, account_slug):
     since = timedelta(days=-30) + today
 
     transactions = Transaction.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
-    recurring_transactions = RecurringTransaction.objects.filter(due_date__gt=today)
+    recurring_transactions = RecurringTransaction.objects.filter(due_date__gte=today)
     
     data = {'account':account, 'transactions': transactions,
             'recurring_transactions':recurring_transactions,
