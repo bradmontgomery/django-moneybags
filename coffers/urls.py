@@ -4,7 +4,7 @@ from django.views.generic.simple import direct_to_template
 urlpatterns = patterns('coffers.views',
     url(r'^$', direct_to_template, {'template':'coffers/default.html'}, name='coffers-default'),
     url(r'^accounts/new/$', 'account_create', name='coffers-accounts-create'),
-    url(r'^accounts/(?P<account_slug>.*)/update-pending/$', 'update_pending', name='coffers-update-pending'),
+    url(r'^accounts/(?P<account_slug>.*)/update/$', 'account_update', name='coffers-account-update'),
     url(r'^accounts/(?P<account_slug>.*)/new/$', 'new_transaction', name='coffers-new-transaction'),
     url(r'^accounts/(?P<account_slug>.*)/(?P<transaction_id>\d+)/$', 'recurring_transaction', name='coffers-recurring-transaction'),
     url(r'^accounts/(?P<account_slug>.*)/$', 'account_detail', name='coffers-account-detail'),

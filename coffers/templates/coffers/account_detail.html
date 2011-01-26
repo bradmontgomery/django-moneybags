@@ -15,13 +15,17 @@
         {% endfor %}    
     {% endif %}
 
+    <p style="margin-top: 1em; text-align: right;">&rarr; 
+    <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a></p>
+
     {% if transactions %}
-        {{ formset.managment_form }}
+        <form action="{% url coffers-account-update account.slug %}" method="post">{% csrf_token %}
+        {{ formset.management_form }}
         <table>
         <caption>{{ account }}: ${{ balance }}</caption>
         <thead>
             <tr>
-            <th>id</th>
+            <th>&nbsp;</th>
             <th>Type</th>
             <th>Date</th>
             <th><abbr title="Check Number">Ck no.</abbr></th>
@@ -34,9 +38,8 @@
         </thead>
         <tbody>
         {% for t in transactions %}
-            <tr class="transaction {% if t.is_credit %}credit{% else %}debit{% endif %} {% if t.recurring %}recurring{% endif %} {% if t.pending %}pending{% endif %}">
+            <tr class="{% cycle '' 'alternate ' %}transaction {% if t.is_credit %}credit{% else %}debit{% endif %} {% if t.recurring %}recurring{% endif %} {% if t.pending %}pending{% endif %}">
             <td>
-                ({{ t.id }})
                 {% for form in formset.forms %}
                     {% ifequal form.initial.object_id t.id %}
                         {% for field in form %}
@@ -57,6 +60,11 @@
         {% endfor %}
         </tbody>
         </table>
+        <p>
+            <button type="submit" id="id_remove_pending" name="action" value="remove-pending">Remove Pending</button>
+            <button type="submit" id="id_delete" name="action" value="delete">Delete</button>
+        </p>
+        </form>
     {% else %}
         {% if balance %}
             {# There have obviously been *some* transactions, just not recently #}
@@ -66,7 +74,8 @@
             <p>You currently have no transactions.</p>
         {% endif %}
     {% endif %}
-    <p style="margin-top: 1em; text-align: right;">&rarr; <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a>.</p>
+    <p style="margin-top: 1em; text-align: right;">&rarr; 
+    <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a></p>
 
 {% endblock %}
 

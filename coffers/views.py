@@ -83,7 +83,7 @@ def account_detail(request, account_slug):
     transactions = Transaction.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
     recurring_transactions = RecurringTransaction.objects.filter(due_date__gte=today)
     
-    ##TODO: Create a FormSet using the TransactionCheckBoxForm for each Transaction listed.
+    # Create a FormSet using a TransactionCheckBoxForm for each Transaction listed.
     TransactionFormSet = formset_factory(TransactionCheckBoxForm, extra=0)
     initial_data = [{'value':False, 'object_id':t.id} for t in transactions]
     formset = TransactionFormSet(initial=initial_data)
@@ -98,11 +98,42 @@ def account_detail(request, account_slug):
                               context_instance=RequestContext(request))
 
 @login_required
-def update_pending(request, account_slug):
-    """ Update pending transactions, then redirect to account detail """ 
-    account = get_object_or_404(Account, slug=account_slug, owner=request.user)
-    ##TODO: Handle POST from the FormSet created in account_detail
+def account_update(request, account_slug):
+    """ 
+    Handle POST from account_detail, and update selected transactions:
     
-    ## redirect to account_detail
-    return redirect(account)
+    - delete
+    - set as pending/not pending
+    
+    Then redirect to account detail 
+    """ 
+    account = get_object_or_404(Account, slug=account_slug, owner=request.user)
+   
+    cleaned_data = None
+    if request.method == 'POST' and 'action' in request.POST:
+        action = request.POST.get('action', None)
 
+        #TODO: the next 3 lines are the same as in account_detail
+        today = date.today()
+        since = timedelta(days=-30) + today
+        transactions = Transaction.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
+
+        TransactionFormSet = formset_factory(TransactionCheckBoxForm, extra=0)
+        #initial_data = [{'value':False, 'object_id':t.id} for t in transactions]
+        #formset = TransactionFormSet(request.POST, request.FILES, initial=initial_data)
+        formset = TransactionFormSet(request.POST, request.FILES)
+
+        if action and formset.is_valid():
+            cleaned_data = formset.cleaned_data
+            # Cleaned data is a list of dicts of the form:
+            # {'object_id':X, 'value':False }
+            # We need to perform the action on the objects whose values are True
+            ids = [d['object_id'] for d in cleaned_data if d['value']]
+
+            # NOTE: the following perform BULK operations, so they don't execute Transaction.save()
+            if action == 'delete':
+                Transaction.objects.filter(id__in=ids).delete()
+            elif action == 'remove-pending':
+                Transaction.objects.filter(id__in=ids).update(pending=False)
+
+    return redirect(account)
