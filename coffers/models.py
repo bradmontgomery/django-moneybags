@@ -175,6 +175,12 @@ class RecurringTransaction(models.Model):
         self.due_date = self.get_due_date() or self.frequency_start_date or self.last_transaction_date
         super(RecurringTransaction, self).save(*args, **kwargs)
 
+    def get_type(self):
+        """ credit if amount > 0, debit otherwise """
+        if self.amount > 0:
+            return 'credit'
+        return 'debit'
+
     def get_due_date(self):
         """ Calculate the due date for this recurring transaction """
         new_date = None

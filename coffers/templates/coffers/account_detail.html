@@ -3,16 +3,31 @@
 {% block content %}
 
     {% if recurring_transactions %}
+        <table>
+        <caption>Don't Forget!</caption>
+        <thead>
+            <tr>
+            <th>Due</th>
+            <th>Amount</th>
+            <th>Frequency</th>
+            <th>Description</th>
+            <th>Last Transaction</th>
+            <th>Started On</th>
+            </tr>
+        </thead>
+        <tbody>
         {% for rt in recurring_transactions %}
-            <p style="border-bottom: 1px solid #aaa">
-            Description: {{ rt.description }}<br/>
-            Amount: {{ rt.amount }}<br/>
-            Frequency: {{ rt.get_frequency_display }}<br/>
-            Start: {{ rt.frequency_start_date }}<br/>
-            Last Transaction Date: {{ rt.last_transaction_date }}<br/>
-            Due: {{ rt.due_date }}<br/>
-            </p>
+            <tr class="{% cycle '' 'alternate ' %}{{ rt.get_type }}">
+            <td>{{ rt.due_date }}</td>
+            <td>{{ rt.amount }}</td>
+            <td>{{ rt.get_frequency_display }}</td>
+            <td>{{ rt.description }}</td>
+            <td>{{ rt.last_transaction_date }}</td>
+            <td>{{ rt.frequency_start_date }}</td>
+            </tr>
         {% endfor %}    
+        </tbody>
+        </table>
     {% endif %}
 
     <p style="margin-top: 1em; text-align: right;">&rarr; 
