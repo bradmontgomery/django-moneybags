@@ -146,8 +146,8 @@ def transaction_detail(request, account_slug, transaction_id):
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     transaction = get_object_or_404(Transaction, account=account, id=transaction_id)
    
-    previous_transactions = Transaction.objects.filter(description=transaction.description, transaction_type=transaction.transaction_type, account=transaction.account).exclude(id=transaction.id).order_by('-date')
-    data = {'account':account, 'transaction': transaction, 'previous_transactions':previous_transactions}
+    similar_transactions = Transaction.objects.filter(description=transaction.description, transaction_type=transaction.transaction_type, account=transaction.account).exclude(id=transaction.id).order_by('-date')
+    data = {'account':account, 'transaction': transaction, 'similar_transactions':similar_transactions}
     return render_to_response('coffers/transaction_detail.html', 
                               data,
                               context_instance=RequestContext(request))
