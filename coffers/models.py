@@ -39,6 +39,8 @@ class TransactionManager(models.Manager):
         return self.filter(transaction_type=-1)
     def credits(self):
         return self.filter(transaction_type=1)
+    ### TODO: put in aggregate functions here that accept account as input, and give
+    ###       us the balance, total debits, total credits?
 
 class Transaction(models.Model):
     """
