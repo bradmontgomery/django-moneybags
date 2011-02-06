@@ -22,7 +22,7 @@ def new_transaction(request, account_slug):
         object.save()
         if object.recurring:
             return redirect(object.get_recurring_transaction_url())
-        return redirect(object) # account detail
+        return redirect(object.account) # account detail
 
     data = {'account':account, 'form':form, 'object':object }
     return render_to_response('coffers/new_transaction.html', 
@@ -145,8 +145,9 @@ def transaction_detail(request, account_slug, transaction_id):
     """
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     transaction = get_object_or_404(Transaction, account=account, id=transaction_id)
-    
-    data = {'account':account, 'transaction': transaction}
+   
+    previous_transactions = Transaction.objects.filter(description=transaction.description, transaction_type=transaction.transaction_type, account=transaction.account).exclude(id=transaction.id).order_by('-date')
+    data = {'account':account, 'transaction': transaction, 'previous_transactions':previous_transactions}
     return render_to_response('coffers/transaction_detail.html', 
                               data,
                               context_instance=RequestContext(request))

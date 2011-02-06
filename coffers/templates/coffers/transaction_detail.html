@@ -15,4 +15,28 @@
     <tr class="alternate"><th>Last Updated</th><td>{{ transaction.updated_on|date:"M j, Y g:ia" }}</td></tr>
     </tbody>
     </table>
+
+    {% if previous_transactions %}
+        <table>
+        <caption>Previously Paid</caption>
+        <thead>
+            <tr>
+            <th>Date</th>
+            <th>Check No</th>
+            <th>Amount</th>
+            <th>Updated On</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for t in previous_transactions %}
+            <tr class="transaction{% if t.pending %} pending{% endif %}{% cycle '' ' alternate'%}">
+            <td>{{ t.date|date:"Y-m-d" }}</td>
+            <td>{% if t.check_no %}{{ t.check_no }}{% else %}n/a{% endif %}</td>
+            <td>{{ t.amount }}</td>
+            <td>{{ t.updated_on|date:"Y-m-d g:ia" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% endif %}
 {% endblock %}
