@@ -124,7 +124,10 @@ class Transaction(models.Model):
                 rt.save()
         
         return rt
-            
+
+    def get_similar_transactions(self):
+        return Transaction.objects.filter(description=self.description, transaction_type=self.transaction_type, account=self.account).exclude(id=self.id).order_by('-date')
+
 class RecurringTransactionManager(models.Manager):
     def due_today(self):
         return self.filter(due_date=datetime.date.today())
