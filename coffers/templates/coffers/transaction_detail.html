@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h1><a href="{{ account.get_absolute_url }}">{{ account.name }}</a></h1>
+    <table>
+    <caption>{{ transaction.description }}</caption>
+    <tbody>
+    <tr><th>Date</th><td>{{ transaction.date|date:"M j, Y" }}</td></tr>
+    {% if transaction.check_no %}<tr><th>Check Number</th><td>{{ transaction.check_no }}</td></tr>{% endif %}
+    <tr class="alternate"><th>Amount</th><td>{{ transaction.amount }}</td></tr>
+    <tr><th>Type:</th><td>{{ transaction.get_transaction_type_display }}</td></tr>
+    <tr class="alternate"><th>Pending</th><td>{{ transaction.pending|yesno }}</td></tr>
+    <tr><th>Recurring</th><td>{{ transaction.recurring|yesno }}</td></tr>
+    <tr class="alternate"><th>Last Updated</th><td>{{ transaction.updated_on|date:"M j, Y g:ia" }}</td></tr>
+    </tbody>
+    </table>
+{% endblock %}

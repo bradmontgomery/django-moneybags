@@ -61,7 +61,8 @@ class Transaction(models.Model):
         verbose_name_plural = 'Transaction'
     
     def get_absolute_url(self):
-        return self.account.get_absolute_url()
+        #return self.account.get_absolute_url()
+        return reverse('coffers-transaction-detail', args=[self.account.slug, self.id, ])
     
     def get_recurring_transaction_url(self):
         return reverse('coffers-recurring-transaction', args=[self.account.slug, self.id])

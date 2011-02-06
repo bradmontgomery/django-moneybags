@@ -137,3 +137,17 @@ def account_update(request, account_slug):
                 Transaction.objects.filter(id__in=ids).update(pending=False)
 
     return redirect(account)
+
+@login_required
+def transaction_detail(request, account_slug, transaction_id):
+    """
+    Show all the details associated with a single Transaction.
+    """
+    account = get_object_or_404(Account, slug=account_slug, owner=request.user)
+    transaction = get_object_or_404(Transaction, account=account, id=transaction_id)
+    
+    data = {'account':account, 'transaction': transaction}
+    return render_to_response('coffers/transaction_detail.html', 
+                              data,
+                              context_instance=RequestContext(request))
+
