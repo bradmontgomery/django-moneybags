@@ -34,6 +34,12 @@ class Account(models.Model):
     def get_absolute_url(self):
         return reverse('coffers-account-detail', args=[self.slug,])
 
+class TransactionManager(models.Manager):
+    def debits(self):
+        return self.filter(transaction_type=-1)
+    def credits(self):
+        return self.filter(transaction_type=1)
+
 class Transaction(models.Model):
     """
     This class represents a monetary transaction.
@@ -73,7 +79,6 @@ class Transaction(models.Model):
         transaction type. We then create or update a RecurringTransaction 
         if neccessaryl
         """
-        self.amount = self.amount * self.transaction_type 
         super(Transaction, self).save(*args, **kwargs)
         self._create_or_update_recurring_transaction()
 
@@ -128,6 +133,9 @@ class Transaction(models.Model):
     def get_similar_transactions(self):
         return Transaction.objects.filter(description=self.description, transaction_type=self.transaction_type, account=self.account).exclude(id=self.id).order_by('-date')
 
+    admin_objects = models.Manager()
+    objects = TransactionManager()
+
 class RecurringTransactionManager(models.Manager):
     def due_today(self):
         return self.filter(due_date=datetime.date.today())
@@ -159,7 +167,6 @@ class RecurringTransaction(models.Model):
     transaction_type = models.IntegerField(choices=Transaction.TRANSACTION_TYPE, help_text="The Type of Transaction")
     due_date = models.DateField(help_text="Automatically Generated from the Frequency and Frequency Start Date")
     updated_on = models.DateTimeField(auto_now=True)
-    
    
     def __unicode__(self):
         return u'%s: %s - last transaction date %s' % (self.account.name, self.description, self.last_transaction_date)
@@ -181,25 +188,26 @@ class RecurringTransaction(models.Model):
 
     def get_type(self):
         """ credit if amount > 0, debit otherwise """
-        if self.amount > 0:
+        if self.transaction_type > 0:
             return 'credit'
         return 'debit'
 
     def get_due_date(self):
         """ Calculate the due date for this recurring transaction """
         new_date = None
+        prev_date = max(self.frequency_start_date, self.last_transaction_date)
         if self.frequency == 'd':
-            new_date = self.frequency_start_date + datetime.timedelta(days=1)
+            new_date = prev_date + datetime.timedelta(days=1)
         elif self.frequency == 'w':
-            new_date = self.frequency_start_date + datetime.timedelta(days=7)
+            new_date = prev_date + datetime.timedelta(days=7)
         elif self.frequency == 'b':
-            new_date = self.frequency_start_date + datetime.timedelta(days=14)
+            new_date = prev_date + datetime.timedelta(days=14)
         elif self.frequency == 'm':
-            new_date = self.frequency_start_date + datetime.timedelta(365/12)
+            new_date = prev_date + datetime.timedelta(365/12)
         elif self.frequency == 'y':
-            new_date = self.frequency_start_date + datetime.timedelta(days=365)
+            new_date = prev_date + datetime.timedelta(days=365)
         elif self.frequency == 'q':
-            new_date = self.frequency_start_date + datetime.timedelta(days=90)
+            new_date = prev_date + datetime.timedelta(days=90)
         
         return new_date
 

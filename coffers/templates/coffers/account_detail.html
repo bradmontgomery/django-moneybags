@@ -7,10 +7,11 @@
         <caption>Don't Forget!</caption>
         <thead>
             <tr>
-            <th>Due</th>
+            <th>Type</th>
+            <th>Due Date</th>
+            <th>Description</th>
             <th>Amount</th>
             <th>Frequency</th>
-            <th>Description</th>
             <th>Last Transaction</th>
             <th>Started On</th>
             </tr>
@@ -18,10 +19,11 @@
         <tbody>
         {% for rt in recurring_transactions %}
             <tr class="{% cycle '' 'alternate ' %}{{ rt.get_type }}">
+            <td>{{ rt.get_transaction_type_display }}</td>
             <td>{{ rt.due_date }}</td>
+            <td>{{ rt.description }}</td>
             <td>{{ rt.amount }}</td>
             <td>{{ rt.get_frequency_display }}</td>
-            <td>{{ rt.description }}</td>
             <td>{{ rt.last_transaction_date }}</td>
             <td>{{ rt.frequency_start_date }}</td>
             </tr>

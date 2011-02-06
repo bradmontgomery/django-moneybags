@@ -74,12 +74,19 @@ def account_detail(request, account_slug):
     """
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     # get the balance of all Transactions.
-    balance = sum(list(Transaction.objects.filter(account=account).values_list('amount', flat=True)))
+    debits = sum(list(Transaction.objects.debits().filter(account=account).values_list('amount', flat=True)))
+    credits = sum(list(Transaction.objects.credits().filter(account=account).values_list('amount', flat=True)))
+    balance = credits - debits
     
     # Display the 30 days worth of transactions.
     today = date.today()
     since = timedelta(days=-30) + today
-
+    
+    ##TODO: 
+    ## for recurring transactions to automatically get dumped into the "Transaction" list, we've got to run the
+    ## ``coffers_create_transactions_due_today`` Management command.  Now, that'll create a Transaction based on RecurringTranscations,
+    ## BUT, the recurringTransaction will still have the wrong date. Either the model, or the managment command needs to 
+    ## update it's due date, 
     transactions = Transaction.objects.filter(date__gte=since, account=account).order_by('-date', 'id')
     recurring_transactions = RecurringTransaction.objects.filter(due_date__gte=today, account=account).order_by('-due_date', 'id')
     
