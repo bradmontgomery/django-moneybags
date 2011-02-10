@@ -4,11 +4,23 @@
     <h2>Accounts</h2>
     <p>&rarr; <a href="{% url coffers-accounts-create %}">Create an Account</a></p>
     {% if accounts %}
-        <ul>
+        <table>
+        <caption>Accounts &amp; Balances</caption>
+        <thead>
+            <tr>
+            <th>Account</th>
+            <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
         {% for account in accounts %}
-            <li><a href="{{ account.get_absolute_url }}">{{ account }}</a></li>
+            <tr>
+            <td><a href="{{ account.get_absolute_url }}">{{ account }}</a></td>
+            <td>{{ account.get_balance }}</td>
+            </tr>
         {% endfor %}
-        </ul>
+        </tbody>
+        </table>
     {% else %}
         <p>You haven't set up any Accounts yet.  <a href="{% url coffers-accounts-create %}">Create One</a>!</p>
     {% endif %}

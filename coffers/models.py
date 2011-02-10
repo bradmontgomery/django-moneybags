@@ -33,7 +33,20 @@ class Account(models.Model):
 
     def get_absolute_url(self):
         return reverse('coffers-account-detail', args=[self.slug,])
+    
+    def _get_debits(self):
+        """ return the sum of all debits for this account """
+        return sum(list(self.transaction_set.filter(transaction_type=-1).values_list('amount', flat=True)))
 
+    def _get_credits(self):
+        """ return the sum of all credits for this account """
+        return sum(list(self.transaction_set.filter(transaction_type=1).values_list('amount', flat=True)))
+
+    def get_balance(self):
+        credits = self._get_credits()
+        debits = self._get_debits()
+        return credits - debits
+        
 class TransactionManager(models.Manager):
     def debits(self):
         return self.filter(transaction_type=-1)

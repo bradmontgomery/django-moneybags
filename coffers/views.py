@@ -92,9 +92,9 @@ def account_detail(request, account_slug):
     """
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     # get the balance of all Transactions.
-    debits = sum(list(Transaction.objects.debits().filter(account=account).values_list('amount', flat=True)))
-    credits = sum(list(Transaction.objects.credits().filter(account=account).values_list('amount', flat=True)))
-    balance = credits - debits
+    #debits = sum(list(Transaction.objects.debits().filter(account=account).values_list('amount', flat=True)))
+    #credits = sum(list(Transaction.objects.credits().filter(account=account).values_list('amount', flat=True)))
+    balance = account.get_balance()
     
     # Display the 30 days worth of transactions.
     today = date.today()
