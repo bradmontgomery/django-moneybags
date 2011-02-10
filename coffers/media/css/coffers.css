@@ -1,7 +1,8 @@
-/* selectors defined in the django-coffers templates */
-th.optional { font-weight: normal; }
-td { margin: 0; padding: .5em; background-color: transparent;}
-tr.debit { background-color: white; }
-tr.credit { background-color: #efe; }
-tr.pending { color: #999; }
-tr.recurring { font-weight: bold; }
+/* classes & ids defined in the django-coffers templates*/
+div#balance {}
+tr.debit {}
+tr.credit {}
+tr.pending {}
+tr.recurring {}
+table.transactiondetail {}
+fieldset ul li.submitbutton {}

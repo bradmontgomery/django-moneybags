@@ -2,9 +2,10 @@
 
 {% block content %}
 
+    <h2>{{ account }}</h2>
     {% if recurring_transactions %}
         <table>
-        <caption>Don't Forget!</caption>
+        <caption>Upcoming Recurring Transactions</caption>
         <thead>
             <tr>
             <th>Type</th>
@@ -13,7 +14,6 @@
             <th>Amount</th>
             <th>Frequency</th>
             <th>Last Transaction</th>
-            <th>Started On</th>
             </tr>
         </thead>
         <tbody>
@@ -25,21 +25,20 @@
             <td>{{ rt.amount }}</td>
             <td>{{ rt.get_frequency_display }}</td>
             <td>{{ rt.last_transaction_date }}</td>
-            <td>{{ rt.frequency_start_date }}</td>
             </tr>
         {% endfor %}    
         </tbody>
         </table>
     {% endif %}
 
-    <p style="margin-top: 1em; text-align: right;">&rarr; 
-    <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a></p>
+    <p>&rarr; <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a></p>
 
     {% if transactions %}
+        <div id="balance">{{ balance }}</div>
         <form action="{% url coffers-account-update account.slug %}" method="post">{% csrf_token %}
         {{ formset.management_form }}
         <table>
-        <caption>{{ account }}: ${{ balance }}</caption>
+        <caption>Recent Transactions</caption>
         <thead>
             <tr>
             <th>&nbsp;</th>
@@ -48,9 +47,6 @@
             <th><abbr title="Check Number">Ck no.</abbr></th>
             <th>Description</th>
             <th>Amount</th>
-            <th class="optional">Recurring?</th>
-            <th>Pending</th>
-            <th>Updated On</th>
             </tr>
         </thead>
         <tbody>
@@ -70,9 +66,6 @@
             <td>{% if t.check_no %}{{ t.check_no }}{% else %}{% endif %}</td>
             <td><a href="{{ t.get_absolute_url }}">{{ t.description }}</a></td>
             <td>{% if t.is_credit %}({{ t.amount }}){% else %}{{ t.abs_amount }}{% endif %}</td>
-            <td>{{ t.recurring|yesno }}</td>
-            <td>{{ t.pending|yesno }}</td>
-            <td>{{ t.updated_on }}</td>
             </tr>
         {% endfor %}
         </tbody>
@@ -85,14 +78,13 @@
     {% else %}
         {% if balance %}
             {# There have obviously been *some* transactions, just not recently #}
-            <h2>{{ account }}: ${{ balance }}</h2>
+            <div id="balance">{{ balance }}</div>
             <p>You don't have any recent transactions.</p>
         {% else %}
             <p>You currently have no transactions.</p>
         {% endif %}
     {% endif %}
-    <p style="margin-top: 1em; text-align: right;">&rarr; 
-    <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a></p>
+    <p>&rarr; <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a></p>
 
 {% endblock %}
 

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{{ account }}: New Transaction</h1>
+    <h2>{{ account }}: New Transaction</h2>
     {% if form %}
     <form action="{% url coffers-new-transaction account.slug %}" method="post">{% csrf_token %}
     <fieldset><legend>New Transaction</legend>
     <ul>
     {{ form.as_ul }}
-    <li><input type="submit" value="Save"/></li>
+    <li class="submitbutton"><input type="submit" value="Save"/></li>
     </ul>
     </fieldset>
     </form>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>{{ account }}: Recurring Transaction</h1>
+    <h2>{{ account }}: Recurring Transaction</h2>
 
     <p>
     You're updating a <em>Recurring {{ transaction.get_transaction_type_display }}</em> called <strong>{{ transaction.description }}</strong>. This 
@@ -13,7 +13,7 @@
     <fieldset><legend>{{ transaction }}</legend>
     <ul>
     {{ form.as_ul }}
-    <li><input type="submit" value="Save"/></li>
+    <li class="submitbutton"><input type="submit" value="Save"/></li>
     </ul>
     </fieldset>
     </form>
