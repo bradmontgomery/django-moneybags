@@ -180,6 +180,9 @@ class RecurringTransaction(models.Model):
     def get_absolute_url(self):
         return self.account.get_absolute_url()
 
+    def get_edit_url(self):
+        return reverse('coffers-edit-recurring-transaction', args=[self.account.slug, self.id])
+
     def save(self, *args, **kwargs):
         """
         Just ``slugify`` the Description.

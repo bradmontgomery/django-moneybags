@@ -21,7 +21,7 @@
             <tr class="{% cycle '' 'alternate ' %}{{ rt.get_type }}">
             <td>{{ rt.get_transaction_type_display }}</td>
             <td>{{ rt.due_date }}</td>
-            <td>{{ rt.description }}</td>
+            <td><a href="{{ rt.get_edit_url }}">{{ rt.description }}</a></td>
             <td>{{ rt.amount }}</td>
             <td>{{ rt.get_frequency_display }}</td>
             <td>{{ rt.last_transaction_date }}</td>

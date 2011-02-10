@@ -49,6 +49,24 @@ def recurring_transaction(request, account_slug, transaction_id):
                                context_instance=RequestContext(request))
 
 @login_required
+def edit_recurring_transaction(request, account_slug, recurring_transaction_id):
+    account = get_object_or_404(Account, slug=account_slug, owner=request.user)
+    recurring_transaction = get_object_or_404(RecurringTransaction, pk=recurring_transaction_id, account=account)
+
+    if recurring_transaction:
+        form, object = modelform_handler(request, RecurringTransactionForm, instance=recurring_transaction, commit=True)
+        if object:
+            return redirect(object)
+
+        data = {'account':account, 'form':form, 'recurring_transaction':recurring_transaction}
+    else:
+        raise Http404
+
+    return render_to_response('coffers/edit_recurring_transaction.html', 
+                               data,
+                               context_instance=RequestContext(request))
+
+@login_required
 def account_list(request):
     accounts = Account.objects.filter(owner=request.user)
     return render_to_response('coffers/account_list.html', 
