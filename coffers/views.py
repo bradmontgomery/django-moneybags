@@ -116,7 +116,7 @@ def account_detail(request, account_slug):
     data = {'account':account, 'transactions': transactions,
             'recurring_transactions':recurring_transactions,
             'today':today, 'since':since, 'balance':balance,
-            'formset':formset, 
+            'overdrawn': not balance > 0, 'formset':formset, 
            }
     return render_to_response('coffers/account_detail.html', 
                               data,

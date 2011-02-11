@@ -34,7 +34,7 @@
     <p>&rarr; <a href="{% url coffers-new-transaction account.slug %}">Enter a Transaction</a></p>
 
     {% if transactions %}
-        <div id="balance">{{ balance }}</div>
+        <div id="balance"{% if overdrawn %}class="overdrawn"{% endif %}><em>Balance:</em> {{ balance }}</div>
         <form action="{% url coffers-account-update account.slug %}" method="post">{% csrf_token %}
         {{ formset.management_form }}
         <table>
@@ -78,7 +78,7 @@
     {% else %}
         {% if balance %}
             {# There have obviously been *some* transactions, just not recently #}
-            <div id="balance">{{ balance }}</div>
+            <div id="balance"{% if overdrawn %}class="overdrawn"{% endif %}><em>Balance:</em> {{ balance }}</div>
             <p>You don't have any recent transactions.</p>
         {% else %}
             <p>You currently have no transactions.</p>
