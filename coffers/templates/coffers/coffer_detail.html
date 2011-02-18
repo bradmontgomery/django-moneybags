@@ -8,23 +8,23 @@
         <caption>Upcoming Recurring Transactions</caption>
         <thead>
             <tr>
-            <th>Type</th>
-            <th>Due Date</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Frequency</th>
-            <th>Last Transaction</th>
+            <th class="type">Type</th>
+            <th class="date">Last Transaction</th>
+            <th class="freq">Frequency</th>
+            <th class="description">Description</th>
+            <th class="date">Due Date</th>
+            <th class="amount">Amount</th>
             </tr>
         </thead>
         <tbody>
         {% for rt in recurring_transactions %}
             <tr class="{% cycle '' 'alternate ' %}{{ rt.get_type }}">
             <td>{{ rt.get_transaction_type_display }}</td>
-            <td>{{ rt.due_date }}</td>
-            <td><a href="{{ rt.get_edit_url }}">{{ rt.description }}</a></td>
-            <td>{{ rt.amount }}</td>
+            <td>{{ rt.last_transaction_date|date:"M n, Y" }}</td>
             <td>{{ rt.get_frequency_display }}</td>
-            <td>{{ rt.last_transaction_date }}</td>
+            <td><a href="{{ rt.get_edit_url }}">{{ rt.description }}</a></td>
+            <td>{{ rt.due_date|date:"M n, Y" }}</td>
+            <td>{{ rt.amount }}</td>
             </tr>
         {% endfor %}    
         </tbody>
@@ -42,11 +42,11 @@
         <thead>
             <tr>
             <th>&nbsp;</th>
-            <th>Type</th>
-            <th>Date</th>
-            <th><abbr title="Check Number">Ck no.</abbr></th>
-            <th>Description</th>
-            <th>Amount</th>
+            <th class="type">Type</th>
+            <th class="date">Date</th>
+            <th class="ckno"><abbr title="Check Number">Ck no.</abbr></th>
+            <th class="description">Description</th>
+            <th class="amount">Amount</th>
             </tr>
         </thead>
         <tbody>
@@ -62,7 +62,7 @@
                 {% endfor %}
             </td>
             <td>{% if t.is_credit %}Credit{% else %}Debit{% endif %}</td>
-            <td>{{ t.date }}</td>
+            <td>{{ t.date|date:"M n, Y" }}</td>
             <td>{% if t.check_no %}{{ t.check_no }}{% else %}{% endif %}</td>
             <td><a href="{{ t.get_absolute_url }}">{{ t.description }}</a></td>
             <td>{% if t.is_credit %}({{ t.amount }}){% else %}{{ t.abs_amount }}{% endif %}</td>

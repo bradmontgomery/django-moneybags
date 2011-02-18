@@ -1,8 +1,15 @@
 /* classes & ids defined in the django-coffers templates*/
 div#balance {}
+table.transactiondetail {}
 tr.debit {}
 tr.credit {}
 tr.pending {}
 tr.recurring {}
-table.transactiondetail {}
+/* columns in coffer_detail.html */
+th.type {}
+th.date {}
+th.description {}
+th.amount {}
+th.freq {}
+th.ckno {}
 fieldset ul li.submitbutton {}
