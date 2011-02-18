@@ -12,4 +12,6 @@ th.description {}
 th.amount {}
 th.freq {}
 th.ckno {}
+/* additional selectors */
+td.selectall {} /* contains a checkbox for a javascript control to select all */
 fieldset ul li.submitbutton {}

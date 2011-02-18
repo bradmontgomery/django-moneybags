@@ -48,7 +48,25 @@
             <th class="description">Description</th>
             <th class="amount">Amount</th>
             </tr>
+            <tr>
+            <td class="selectall"></td>
+            <td colspan="5">
+            <button type="submit" id="id_remove_pending" name="action" value="remove-pending">Remove Pending</button>
+            <button type="submit" id="id_delete" name="action" value="delete">Delete</button>
+            </td>
+            </tr>
         </thead>
+        
+        <tfoot>
+            <tr>
+            <td class="selectall"></td>
+            <td colspan="5">
+            <button type="submit" id="id_remove_pending" name="action" value="remove-pending">Remove Pending</button>
+            <button type="submit" id="id_delete" name="action" value="delete">Delete</button>
+            </td>
+            </tr>
+        </tfoot>
+        
         <tbody>
         {% for t in transactions %}
             <tr class="{% cycle '' 'alternate ' %}transaction {% if t.is_credit %}credit{% else %}debit{% endif %} {% if t.recurring %}recurring{% endif %} {% if t.pending %}pending{% endif %}">
@@ -70,10 +88,6 @@
         {% endfor %}
         </tbody>
         </table>
-        <p>
-            <button type="submit" id="id_remove_pending" name="action" value="remove-pending">Remove Pending</button>
-            <button type="submit" id="id_delete" name="action" value="delete">Delete</button>
-        </p>
         </form>
     {% else %}
         {% if balance %}
