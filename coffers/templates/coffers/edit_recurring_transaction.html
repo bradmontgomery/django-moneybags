@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>{{ account }}: Recurring Transaction</h2>
+    <h2>{{ coffer }}: Recurring Transaction</h2>
 
     <p class="notice">
     You're updating a <em>Recurring {{ recurring_transaction.get_transaction_type_display }}</em> called 
     <strong>{{ recurring_transaction.description }}</strong>. This will automatically show up in your 
-    account as a <em>Pending</em> transaction after the designated amount of time.
+    coffer as a <em>Pending</em> transaction after the designated amount of time.
     </p>
     
     {% if form %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Coffers</h2>
+    <p>&rarr; <a href="{% url coffers-coffer-create %}">Create an Coffer</a></p>
+    {% if coffers %}
+        <table>
+        <caption>Coffers &amp; Balances</caption>
+        <thead>
+            <tr>
+            <th>Coffer</th>
+            <th>Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for coffer in coffers %}
+            <tr>
+            <td><a href="{{ coffer.get_absolute_url }}">{{ coffer }}</a></td>
+            <td>{{ coffer.get_balance }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <p>You haven't set up any Coffers yet.  <a href="{% url coffers-coffer-create %}">Create One</a>!</p>
+    {% endif %}
+    
+{% endblock %}
+

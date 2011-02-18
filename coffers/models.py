@@ -10,9 +10,9 @@ from django.template.defaultfilters import slugify
 AMOUNT_MAX_DIGITS = 20
 AMOUNT_DECIMAL_PLACES = 2
 
-class Account(models.Model):
+class Coffer(models.Model):
     """
-    An account is an "container" for Transactions, and is "owned" by a ``User``.
+    This is a container for Transactions, and is "owned" by a ``User``.
     """
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
@@ -23,23 +23,23 @@ class Account(models.Model):
 
     class Meta:
         ordering = ['name', ]
-        verbose_name = 'Account'
-        verbose_name_plural = 'Accounts'
+        verbose_name = 'Coffer'
+        verbose_name_plural = 'Coffers'
 
     def save(self, *args, **kwargs):
         """ Generate the slug from the name """
         self.slug = slugify(self.name)
-        super(Account, self).save(*args, **kwargs)
+        super(Coffer, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('coffers-account-detail', args=[self.slug,])
+        return reverse('coffers-coffer-detail', args=[self.slug,])
     
     def _get_debits(self):
-        """ return the sum of all debits for this account """
+        """ return the sum of all debits for this coffer """
         return sum(list(self.transaction_set.filter(transaction_type=-1).values_list('amount', flat=True)))
 
     def _get_credits(self):
-        """ return the sum of all credits for this account """
+        """ return the sum of all credits for this coffer """
         return sum(list(self.transaction_set.filter(transaction_type=1).values_list('amount', flat=True)))
 
     def get_balance(self):
@@ -52,7 +52,7 @@ class TransactionManager(models.Manager):
         return self.filter(transaction_type=-1)
     def credits(self):
         return self.filter(transaction_type=1)
-    ### TODO: put in aggregate functions here that accept account as input, and give
+    ### TODO: put in aggregate functions here that accept coffer as input, and give
     ###       us the balance, total debits, total credits?
 
 class Transaction(models.Model):
@@ -70,7 +70,7 @@ class Transaction(models.Model):
     recurring = models.BooleanField(blank=True, default=False, help_text="Is this a Recurring Transaction")
     pending = models.BooleanField(blank=True, default=True, help_text="Is this transaction still pending?")
     transaction_type = models.IntegerField(choices=TRANSACTION_TYPE, help_text="The Type of Transaction")
-    account = models.ForeignKey(Account)
+    coffer = models.ForeignKey(Coffer)
     updated_on = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
@@ -82,11 +82,11 @@ class Transaction(models.Model):
         verbose_name_plural = 'Transaction'
     
     def get_absolute_url(self):
-        #return self.account.get_absolute_url()
-        return reverse('coffers-transaction-detail', args=[self.account.slug, self.id, ])
+        #return self.coffer.get_absolute_url()
+        return reverse('coffers-transaction-detail', args=[self.coffer.slug, self.id, ])
     
     def get_recurring_transaction_url(self):
-        return reverse('coffers-recurring-transaction', args=[self.account.slug, self.id])
+        return reverse('coffers-recurring-transaction', args=[self.coffer.slug, self.id])
 
     def save(self, *args, **kwargs):
         """ 
@@ -113,9 +113,9 @@ class Transaction(models.Model):
         if self.recurring:
             desc_slug = slugify(self.description)
             try:
-                rt = RecurringTransaction.objects.get(desc_slug=desc_slug, account=self.account, transaction_type=self.transaction_type)
+                rt = RecurringTransaction.objects.get(desc_slug=desc_slug, coffer=self.coffer, transaction_type=self.transaction_type)
             except RecurringTransaction.DoesNotExist:
-                rt = RecurringTransaction(desc_slug=desc_slug, account=self.account, transaction_type=self.transaction_type)
+                rt = RecurringTransaction(desc_slug=desc_slug, coffer=self.coffer, transaction_type=self.transaction_type)
                 rt.frequency_start_date = self.date
            
             rt.description = self.description
@@ -133,10 +133,10 @@ class Transaction(models.Model):
         rt = None 
         if self.recurring: 
             try:
-                rt = RecurringTransaction.objects.get(desc_slug=slugify(self.description), account=self.account, transaction_type=self.transaction_type)
+                rt = RecurringTransaction.objects.get(desc_slug=slugify(self.description), coffer=self.coffer, transaction_type=self.transaction_type)
             except RecurringTransaction.DoesNotExist:
                 # Ugh... create it?
-                rt = RecurringTransaction(desc_slug=slugify(self.description), account=self.account, transaction_type=self.transaction_type)
+                rt = RecurringTransaction(desc_slug=slugify(self.description), coffer=self.coffer, transaction_type=self.transaction_type)
                 rt.description = self.description
                 rt.amount = self.amount
                 rt.last_transaction_date = self.date
@@ -146,7 +146,7 @@ class Transaction(models.Model):
         return rt
 
     def get_similar_transactions(self):
-        return Transaction.objects.filter(description=self.description, transaction_type=self.transaction_type, account=self.account).exclude(id=self.id).order_by('-date')
+        return Transaction.objects.filter(description=self.description, transaction_type=self.transaction_type, coffer=self.coffer).exclude(id=self.id).order_by('-date')
 
     admin_objects = models.Manager()
     objects = TransactionManager()
@@ -158,7 +158,7 @@ class RecurringTransactionManager(models.Manager):
 class RecurringTransaction(models.Model):
     """
     This model provides a way to track recurring transactions. Note
-    that the ``desc_slug`` and ``account`` fields are set as ``unique_together``.
+    that the ``desc_slug`` and ``coffer`` fields are set as ``unique_together``.
 
     One instance of this model will represent the "last" time a 
     recurring transaction was made.
@@ -175,7 +175,7 @@ class RecurringTransaction(models.Model):
     description = models.CharField(max_length=255, help_text="This should match the description from the Transaction")
     desc_slug = models.SlugField(max_length=255, help_text="A sluggified version of the description")
     amount = models.DecimalField(max_digits=AMOUNT_MAX_DIGITS, decimal_places=AMOUNT_DECIMAL_PLACES, help_text="Amount to be paid")
-    account = models.ForeignKey(Account, help_text="The account in which this belongs")
+    coffer = models.ForeignKey(Coffer, help_text="The Coffer in which this belongs")
     frequency = models.CharField(max_length=1, choices=FREQUENCY_CHOICES)
     frequency_start_date = models.DateField(help_text="The date from which the frequency should be calculated")
     last_transaction_date = models.DateField(help_text="The date on which the last transaction occurred")
@@ -184,17 +184,17 @@ class RecurringTransaction(models.Model):
     updated_on = models.DateTimeField(auto_now=True)
    
     def __unicode__(self):
-        return u'%s: %s - last transaction date %s' % (self.account.name, self.description, self.last_transaction_date)
+        return u'%s: %s - last transaction date %s' % (self.coffer.name, self.description, self.last_transaction_date)
 
     class Meta:
-        ordering = ['-last_transaction_date', 'account', 'description']
-        unique_together = ['account', 'desc_slug']
+        ordering = ['-last_transaction_date', 'coffer', 'description']
+        unique_together = ['coffer', 'desc_slug']
     
     def get_absolute_url(self):
-        return self.account.get_absolute_url()
+        return self.coffer.get_absolute_url()
 
     def get_edit_url(self):
-        return reverse('coffers-edit-recurring-transaction', args=[self.account.slug, self.id])
+        return reverse('coffers-edit-recurring-transaction', args=[self.coffer.slug, self.id])
 
     def save(self, *args, **kwargs):
         """
@@ -238,8 +238,8 @@ def create_transactions_due_today():
     """
     for rt in RecurringTransaction.objects.due_today():
         # Make sure it doesn't already exist!
-        if not Transaction.objects.filter(date=rt.due_date, description=rt.description, amount=rt.amount, recurring=True, account=rt.account, transaction_type=rt.transaction_type).count():
-            new_trans = Transaction(date=rt.due_date, account=rt.account)
+        if not Transaction.objects.filter(date=rt.due_date, description=rt.description, amount=rt.amount, recurring=True, coffer=rt.coffer, transaction_type=rt.transaction_type).count():
+            new_trans = Transaction(date=rt.due_date, coffer=rt.coffer)
             new_trans.description=rt.description
             new_trans.amount=rt.amount
             new_trans.recurring=True

@@ -1,15 +1,15 @@
 from django import forms
-from models import Account, Transaction, RecurringTransaction
+from models import Coffer, Transaction, RecurringTransaction
 
-class AccountForm(forms.ModelForm):
+class CofferForm(forms.ModelForm):
     class Meta:
-        model = Account
+        model = Coffer
         exclude = ('owner', 'slug', )
 
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        exclude = ('account', 'updated_on')
+        exclude = ('coffer', 'updated_on')
 
 class RecurringTransactionForm(forms.ModelForm):
     class Meta:

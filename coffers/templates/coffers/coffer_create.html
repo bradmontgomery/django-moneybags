@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Create an Coffer</h2>
+    {% if form %}
+    <form action="{% url coffers-coffer-create %}" method="post">{% csrf_token %}
+    <fieldset><legend>New Coffer</legend>
+    <ul>
+    {{ form.as_ul }}
+    <li class="submitbutton"><input type="submit" value="Create Coffer"/></li>
+    </ul>
+    </fieldset>
+    </form>
+    {% endif %}
+{% endblock %}
+
