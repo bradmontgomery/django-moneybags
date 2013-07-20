@@ -31,11 +31,11 @@
         </table>
     {% endif %}
 
-    <p>&rarr; <a href="{% url coffers-new-transaction coffer.slug %}">Enter a Transaction</a></p>
+    <p>&rarr; <a href="{% url moneybags-new-transaction coffer.slug %}">Enter a Transaction</a></p>
 
     {% if transactions %}
         <div id="balance"{% if overdrawn %}class="overdrawn"{% endif %}><em>Balance:</em> {{ balance }}</div>
-        <form action="{% url coffers-coffer-update coffer.slug %}" method="post">{% csrf_token %}
+        <form action="{% url moneybags-coffer-update coffer.slug %}" method="post">{% csrf_token %}
         {{ formset.management_form }}
         <table>
         <caption>Recent Transactions</caption>
@@ -98,7 +98,7 @@
             <p>You currently have no transactions.</p>
         {% endif %}
     {% endif %}
-    <p>&rarr; <a href="{% url coffers-new-transaction coffer.slug %}">Enter a Transaction</a></p>
+    <p>&rarr; <a href="{% url moneybags-new-transaction coffer.slug %}">Enter a Transaction</a></p>
 
 {% endblock %}
 

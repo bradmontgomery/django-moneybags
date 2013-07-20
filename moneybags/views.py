@@ -25,7 +25,7 @@ def new_transaction(request, coffer_slug):
         return redirect(object.coffer) # coffer detail
 
     data = {'coffer':coffer, 'form':form, 'object':object }
-    return render_to_response('coffers/new_transaction.html', 
+    return render_to_response('moneybags/new_transaction.html', 
                                data,
                                context_instance=RequestContext(request))
 
@@ -44,7 +44,7 @@ def recurring_transaction(request, coffer_slug, transaction_id):
     else:
         raise Http404
 
-    return render_to_response('coffers/recurring_transaction.html', 
+    return render_to_response('moneybags/recurring_transaction.html', 
                                data,
                                context_instance=RequestContext(request))
 
@@ -62,15 +62,15 @@ def edit_recurring_transaction(request, coffer_slug, recurring_transaction_id):
     else:
         raise Http404
 
-    return render_to_response('coffers/edit_recurring_transaction.html', 
+    return render_to_response('moneybags/edit_recurring_transaction.html', 
                                data,
                                context_instance=RequestContext(request))
 
 @login_required
 def coffer_list(request):
-    coffers = Coffer.objects.filter(owner=request.user)
-    return render_to_response('coffers/coffer_list.html', 
-                               {'coffers':coffers}, 
+    moneybags = Coffer.objects.filter(owner=request.user)
+    return render_to_response('moneybags/coffer_list.html', 
+                               {'moneybags':moneybags}, 
                                context_instance=RequestContext(request))
 
 @login_required
@@ -81,7 +81,7 @@ def coffer_create(request):
         object.owner = request.user
         object.save()
         return redirect(object)
-    return render_to_response('coffers/coffer_create.html', 
+    return render_to_response('moneybags/coffer_create.html', 
                                {'form':form}, 
                                context_instance=RequestContext(request))
 
@@ -102,7 +102,7 @@ def coffer_detail(request, coffer_slug):
     
     ##TODO: 
     ## for recurring transactions to automatically get dumped into the "Transaction" list, we've got to run the
-    ## ``coffers_create_transactions_due_today`` Management command.  Now, that'll create a Transaction based on RecurringTranscations,
+    ## ``moneybags_create_transactions_due_today`` Management command.  Now, that'll create a Transaction based on RecurringTranscations,
     ## BUT, the recurringTransaction will still have the wrong date. Either the model, or the managment command needs to 
     ## update it's due date, 
     transactions = Transaction.objects.filter(date__gte=since, coffer=coffer).order_by('-date', 'id')
@@ -118,7 +118,7 @@ def coffer_detail(request, coffer_slug):
             'today':today, 'since':since, 'balance':balance,
             'overdrawn': not balance > 0, 'formset':formset, 
            }
-    return render_to_response('coffers/coffer_detail.html', 
+    return render_to_response('moneybags/coffer_detail.html', 
                               data,
                               context_instance=RequestContext(request))
 
@@ -173,7 +173,7 @@ def transaction_detail(request, coffer_slug, transaction_id):
    
     similar_transactions = transaction.get_similar_transactions()
     data = {'coffer':coffer, 'transaction': transaction, 'similar_transactions':similar_transactions}
-    return render_to_response('coffers/transaction_detail.html', 
+    return render_to_response('moneybags/transaction_detail.html', 
                               data,
                               context_instance=RequestContext(request))
 

@@ -32,7 +32,7 @@ class Coffer(models.Model):
         super(Coffer, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('coffers-coffer-detail', args=[self.slug,])
+        return reverse('moneybags-coffer-detail', args=[self.slug,])
     
     def _get_debits(self):
         """ return the sum of all debits for this coffer """
@@ -83,10 +83,10 @@ class Transaction(models.Model):
     
     def get_absolute_url(self):
         #return self.coffer.get_absolute_url()
-        return reverse('coffers-transaction-detail', args=[self.coffer.slug, self.id, ])
+        return reverse('moneybags-transaction-detail', args=[self.coffer.slug, self.id, ])
     
     def get_recurring_transaction_url(self):
-        return reverse('coffers-recurring-transaction', args=[self.coffer.slug, self.id])
+        return reverse('moneybags-recurring-transaction', args=[self.coffer.slug, self.id])
 
     def save(self, *args, **kwargs):
         """ 
@@ -194,7 +194,7 @@ class RecurringTransaction(models.Model):
         return self.coffer.get_absolute_url()
 
     def get_edit_url(self):
-        return reverse('coffers-edit-recurring-transaction', args=[self.coffer.slug, self.id])
+        return reverse('moneybags-edit-recurring-transaction', args=[self.coffer.slug, self.id])
 
     def save(self, *args, **kwargs):
         """

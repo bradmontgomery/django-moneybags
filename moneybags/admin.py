@@ -1,5 +1,5 @@
 from django.contrib import admin
-from coffers import models 
+from moneybags import models 
 
 class CofferAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug', 'owner', )
