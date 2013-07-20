@@ -2,7 +2,7 @@
 
 {% block content %}
     <h2>Coffers</h2>
-    <p>&rarr; <a href="{% url moneybags-coffer-create %}">Create an Coffer</a></p>
+    <p>&rarr; <a href="{% url moneybags-account-create %}">Create an Coffer</a></p>
     {% if moneybags %}
         <table>
         <caption>Coffers &amp; Balances</caption>
@@ -13,16 +13,16 @@
             </tr>
         </thead>
         <tbody>
-        {% for coffer in moneybags %}
+        {% for account in moneybags %}
             <tr>
-            <td><a href="{{ coffer.get_absolute_url }}">{{ coffer }}</a></td>
-            <td>{{ coffer.get_balance }}</td>
+            <td><a href="{{ account.get_absolute_url }}">{{ account }}</a></td>
+            <td>{{ account.get_balance }}</td>
             </tr>
         {% endfor %}
         </tbody>
         </table>
     {% else %}
-        <p>You haven't set up any Coffers yet.  <a href="{% url moneybags-coffer-create %}">Create One</a>!</p>
+        <p>You haven't set up any Coffers yet.  <a href="{% url moneybags-account-create %}">Create One</a>!</p>
     {% endif %}
     
 {% endblock %}
