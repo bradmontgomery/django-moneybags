@@ -1,15 +1,14 @@
-==============
-django-coffers
-==============
+django-moneybags
+================
 
-About
------
-This app aims to make it easy to ``manually`` track personal finances.
-It is very much a work in progress.
+Yet another django app to track your money. It's sort of like single-entry
+bookkeeping.
 
-Installation
-------------
-TODO: write this.
+In-Progress
+-----------
+
+This is currently a work-in-progress. Things are changing...
+
 
 License
 -------
