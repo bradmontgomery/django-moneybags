@@ -29,7 +29,7 @@ class Account(models.Model):
         super(Account, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('moneybags-coffer-detail', args=[self.slug])
+        return reverse('moneybags-account-detail', args=[self.slug])
 
     def _get_debits(self):
         """return the sum of all debits for this account"""
