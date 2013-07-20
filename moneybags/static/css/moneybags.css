@@ -1,11 +1,11 @@
-/* classes & ids defined in the django-moneybags templates*/
+/* classes & ids defined in the django-moneybags templates */
 div#balance {}
 table.transactiondetail {}
 tr.debit {}
 tr.credit {}
 tr.pending {}
 tr.recurring {}
-/* columns in coffer_detail.html */
+/* columns in account_detail.html */
 th.type {}
 th.date {}
 th.description {}
