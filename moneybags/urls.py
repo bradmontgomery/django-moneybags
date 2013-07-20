@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import patterns, url
-from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 
 
 urlpatterns = patterns('moneybags.views',
@@ -27,14 +27,14 @@ urlpatterns = patterns('moneybags.views',
     url(r'^moneybags/$',
         'account_list',
         name='moneybags-account-list'),
+)
 
+urlpatterns += patterns('',
     url(r'^saved/$',
-        direct_to_template,
-        {'template': 'moneybags/saved.html'},
+        TemplateView.as_view(template_name='moneybags/saved.html'),
         name='moneybags-saved'),
 
     url(r'^$',
-        direct_to_template,
-        {'template': 'moneybags/default.html'},
+        TemplateView.as_view(template_name='moneybags/default.html'),
         name='moneybags-default'),
 )
