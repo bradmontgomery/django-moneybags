@@ -2,8 +2,13 @@ from collections import namedtuple
 from csv import reader
 from decimal import Decimal, InvalidOperation
 
+from .settings import (
+    TRANSACTION_TYPE_DEBIT,
+    TRANSACTION_TYPE_CREDIT,
+)
 
-def load_transactions_from_csv(path_to_csv_file):
+
+def load_csv_data(path_to_csv_file):
     """Loads data from a CSV file, returning a list of ``namedtuple``s
     containing transaction data.
 
@@ -30,4 +35,45 @@ def to_decimal(value):
     try:
         value = Decimal(value)
     except InvalidOperation:
-        return Decimal('0')
+        return None
+
+
+def create_transactions(account, transactions):
+    """Create ``Transaction`` objects for the given account (an ``Account``
+    instance) and the given list of transaction data -- this should be a
+    list of ``namedtuple``s like that returned from ``load_csv_data``.
+
+    Note: This creates all Transactions as "pending".
+
+    """
+
+    for trans in transactions:
+        # Check for credits or Debits; One of these should be None
+        debit = to_decimal(trans.debit)
+        credit = to_decimal(trans.credit)
+        if debit is None:
+            # we've got a credit
+            amount = credit
+            trans_type = TRANSACTION_TYPE_CREDIT
+        elif credit is None:
+            # We've got a debit
+            amount = debit
+            trans_type = TRANSACTION_TYPE_DEBIT
+        else:
+            # This is an invalid transaction, skip it.
+            amount = None
+
+        try:
+            check_no = int(trans.check)
+        except ValueError:
+            check_no = None
+
+        if amount is not None:
+            account.transaction_set.create(
+                date=trans.date,
+                check_no=check_no,
+                description=trans.description,
+                amount=amount,
+                pending=True,
+                transaction_type=trans_type
+            )
