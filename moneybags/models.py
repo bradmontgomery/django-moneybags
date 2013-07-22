@@ -5,8 +5,12 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
 
-AMOUNT_MAX_DIGITS = 20
-AMOUNT_DECIMAL_PLACES = 2
+from .settings import (
+    AMOUNT_DECIMAL_PLACES,
+    AMOUNT_MAX_DIGITS,
+    TRANSACTION_TYPE_DEBIT,
+    TRANSACTION_TYPE_CREDIT,
+)
 
 
 class Account(models.Model):
@@ -64,8 +68,8 @@ class TransactionManager(models.Manager):
 class Transaction(models.Model):
     """This class represents a monetary transaction."""
     TRANSACTION_TYPE = (
-        (1, 'Credit'),
-        (-1, 'Debit'),
+        (TRANSACTION_TYPE_CREDIT, 'Credit'),
+        (TRANSACTION_TYPE_DEBIT, 'Debit'),
     )
     account = models.ForeignKey(Account)
     date = models.DateField(help_text="The Date of this transaction")
