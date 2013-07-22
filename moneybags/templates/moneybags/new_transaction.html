@@ -1,9 +1,10 @@
 {% extends "moneybags/base.html" %}
+{% load url from future %}
 
 {% block content %}
     <h2>{{ account }}: New Transaction</h2>
     {% if form %}
-    <form action="{% url moneybags-new-transaction account.slug %}" method="post">{% csrf_token %}
+    <form action="{% url 'moneybags-new-transaction' account.slug %}" method="post">{% csrf_token %}
     <fieldset><legend>New Transaction</legend>
     <ul>
     {{ form.as_ul }}

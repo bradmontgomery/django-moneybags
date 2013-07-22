@@ -1,9 +1,10 @@
 {% extends "moneybags/base.html" %}
+{% load url from future %}
 
 {% block content %}
     <h2>Create an Coffer</h2>
     {% if form %}
-    <form action="{% url moneybags-account-create %}" method="post">{% csrf_token %}
+    <form action="{% url 'moneybags-account-create' %}" method="post">{% csrf_token %}
     <fieldset><legend>New Coffer</legend>
     <ul>
     {{ form.as_ul }}

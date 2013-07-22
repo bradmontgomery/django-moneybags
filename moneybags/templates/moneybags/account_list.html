@@ -1,8 +1,9 @@
 {% extends "moneybags/base.html" %}
+{% load url from future %}
 
 {% block content %}
     <h2>Coffers</h2>
-    <p>&rarr; <a href="{% url moneybags-account-create %}">Create an Coffer</a></p>
+    <p>&rarr; <a href="{% url 'moneybags-account-create' %}">Create an Coffer</a></p>
     {% if moneybags %}
         <table>
         <caption>Coffers &amp; Balances</caption>
@@ -22,8 +23,8 @@
         </tbody>
         </table>
     {% else %}
-        <p>You haven't set up any Coffers yet.  <a href="{% url moneybags-account-create %}">Create One</a>!</p>
+        <p>You haven't set up any Coffers yet.  <a href="{% url 'moneybags-account-create' %}">Create One</a>!</p>
     {% endif %}
-    
+
 {% endblock %}
 
