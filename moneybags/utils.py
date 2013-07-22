@@ -1,6 +1,9 @@
 from collections import namedtuple
 from csv import reader
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from re import sub as regex_sub
+from sys import stdout
 
 from .settings import (
     TRANSACTION_TYPE_DEBIT,
@@ -29,21 +32,34 @@ def load_csv_data(path_to_csv_file):
     return map(Transaction._make, csv_reader)
 
 
-def to_decimal(value):
+def to_decimal(value, formatting_chars=['$', ',']):
     """Convert a string value to a Decimal. Remove any $ characters."""
-    value = value.replace("$", "")
+    # Remove any formatting and/or special characters
+    pattern = "[{0}]".format('|'.join(formatting_chars))
+    value = regex_sub(pattern, '', value)
+
+    # Now, attempt a Decimal conversion.
     try:
         value = Decimal(value)
     except InvalidOperation:
-        return None
+        value = None
+    return value
 
 
-def create_transactions(account, transactions):
-    """Create ``Transaction`` objects for the given account (an ``Account``
-    instance) and the given list of transaction data -- this should be a
-    list of ``namedtuple``s like that returned from ``load_csv_data``.
+def create_transactions(account, transactions, date_format_string='%b %d, %Y',
+                        pending=True, verbose=False):
+    """Create ``Transaction`` objects for the given Account and the given
+    list of transaction data.
 
-    Note: This creates all Transactions as "pending".
+    * ``account`` -- The ``Account`` under which to group Transactions.
+    * ``transactions`` -- a list of ``namedtuple``s like that returned from
+      ``load_csv_data``.
+    * ``pending`` -- (default is True) Whether or not to create pending
+      Transactions
+    * ``date_format_string`` -- used by strptime; the format to convert a
+      string into a datetime object. Default is '%b %d, %Y'
+    * ``verbose`` -- (default is False) Print info to stdout upon creation of
+      each transaction.
 
     """
 
@@ -62,18 +78,27 @@ def create_transactions(account, transactions):
         else:
             # This is an invalid transaction, skip it.
             amount = None
+            if verbose:
+                stdout.write("---> Amount is NONE for {0}!\n".format(trans))
 
         try:
             check_no = int(trans.check)
         except ValueError:
             check_no = None
 
-        if amount is not None:
+        if amount:
             account.transaction_set.create(
-                date=trans.date,
+                date=datetime.strptime(trans.date, date_format_string),
                 check_no=check_no,
                 description=trans.description,
                 amount=amount,
-                pending=True,
+                pending=pending,
                 transaction_type=trans_type
             )
+            if verbose:
+                m = "Created: {date} / {desc} / ${amt}\n".format(
+                    date=trans.date,
+                    desc=trans.description,
+                    amt=amount
+                )
+                stdout.write(m)
