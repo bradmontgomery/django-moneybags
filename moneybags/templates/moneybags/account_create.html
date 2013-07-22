@@ -2,13 +2,13 @@
 {% load url from future %}
 
 {% block content %}
-    <h2>Create an Coffer</h2>
+    <h2>Create an Account</h2>
     {% if form %}
     <form action="{% url 'moneybags-account-create' %}" method="post">{% csrf_token %}
-    <fieldset><legend>New Coffer</legend>
+    <fieldset><legend>New Account</legend>
     <ul>
     {{ form.as_ul }}
-    <li class="submitbutton"><input type="submit" value="Create Coffer"/></li>
+    <li class="submitbutton"><input type="submit" value="Create Account"/></li>
     </ul>
     </fieldset>
     </form>

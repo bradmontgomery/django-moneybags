@@ -2,14 +2,14 @@
 {% load url from future %}
 
 {% block content %}
-    <h2>Coffers</h2>
-    <p>&rarr; <a href="{% url 'moneybags-account-create' %}">Create an Coffer</a></p>
+    <h2>Accounts</h2>
+    <p>&rarr; <a href="{% url 'moneybags-account-create' %}">Create an Account</a></p>
     {% if moneybags %}
         <table>
-        <caption>Coffers &amp; Balances</caption>
+        <caption>Accounts &amp; Balances</caption>
         <thead>
             <tr>
-            <th>Coffer</th>
+            <th>Account</th>
             <th>Balance</th>
             </tr>
         </thead>
@@ -23,7 +23,7 @@
         </tbody>
         </table>
     {% else %}
-        <p>You haven't set up any Coffers yet.  <a href="{% url 'moneybags-account-create' %}">Create One</a>!</p>
+        <p>You haven't set up any Accounts yet.  <a href="{% url 'moneybags-account-create' %}">Create One</a>!</p>
     {% endif %}
 
 {% endblock %}
