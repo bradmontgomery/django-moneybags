@@ -1,6 +1,6 @@
 import datetime
 
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.template.defaultfilters import slugify
@@ -11,6 +11,8 @@ from .settings import (
     TRANSACTION_TYPE_DEBIT,
     TRANSACTION_TYPE_CREDIT,
 )
+
+User = get_user_model()
 
 
 class Account(models.Model):
