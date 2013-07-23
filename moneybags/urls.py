@@ -15,36 +15,36 @@ from django.views.generic import TemplateView
 
 urlpatterns = patterns('moneybags.views',
     url(r'^new/$',
-        'account_create',
-        name='moneybags-account-create'),
+        'create_account',
+        name='moneybags-create-account'),
 
     url(r'^accounts/$',
-        'account_list',
-        name='moneybags-account-list'),
+        'list_accounts',
+        name='moneybags-list-accounts'),
 
     url(r'^(?P<account_slug>.*)/update/$',
-        'account_update',
-        name='moneybags-account-update'),
+        'update_transactions',
+        name='moneybags-update-transactions'),
 
     url(r'^(?P<account_slug>.*)/new/$',
-        'new_transaction',
-        name='moneybags-new-transaction'),
+        'create_transaction',
+        name='moneybags-create-transaction'),
 
     url(r'^(?P<account_slug>.*)/transaction/(?P<transaction_id>\d+)/$',
-        'transaction_detail',
-        name='moneybags-transaction-detail'),
+        'detail_transaction',
+        name='moneybags-detail-transaction'),
 
     url(r'^(?P<account_slug>.*)/recurring/(?P<recurring_transaction_id>\d+)/$',
-        'edit_recurring_transaction',
-        name='moneybags-edit-recurring-transaction'),
+        'update_recurring_transaction',
+        name='moneybags-update-recurring-transaction'),
 
     url(r'^(?P<account_slug>.*)/(?P<transaction_id>\d+)/$',
         'recurring_transaction',
         name='moneybags-recurring-transaction'),
 
     url(r'^(?P<account_slug>.*)/$',
-        'account_detail',
-        name='moneybags-account-detail'),
+        'detail_account',
+        name='moneybags-detail-account'),
 )
 
 urlpatterns += patterns('',

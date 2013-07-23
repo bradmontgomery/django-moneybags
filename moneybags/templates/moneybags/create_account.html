@@ -4,7 +4,7 @@
 {% block content %}
     <h2>Create an Account</h2>
     {% if form %}
-    <form action="{% url 'moneybags-account-create' %}" method="post">{% csrf_token %}
+    <form action="{% url 'moneybags-create-account' %}" method="post">{% csrf_token %}
     <fieldset><legend>New Account</legend>
     <ul>
     {{ form.as_ul }}

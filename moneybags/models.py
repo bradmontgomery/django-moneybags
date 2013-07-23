@@ -35,7 +35,7 @@ class Account(models.Model):
         super(Account, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
-        return reverse('moneybags-account-detail', args=[self.slug])
+        return reverse('moneybags-detail-account', args=[self.slug])
 
     def _get_debits(self):
         """return the sum of all debits for this account"""
@@ -104,7 +104,7 @@ class Transaction(models.Model):
 
     def get_absolute_url(self):
         args = [self.account.slug, self.id]
-        return reverse('moneybags-transaction-detail', args=args)
+        return reverse('moneybags-detail-transaction', args=args)
 
     def get_recurring_transaction_url(self):
         args = [self.account.slug, self.id]
@@ -256,7 +256,7 @@ class RecurringTransaction(models.Model):
 
     def get_edit_url(self):
         args = [self.account.slug, self.id]
-        return reverse('moneybags-edit-recurring-transaction', args=args)
+        return reverse('moneybags-update-recurring-transaction', args=args)
 
     def save(self, *args, **kwargs):
         """Just ``slugify`` the Description."""

@@ -11,7 +11,8 @@ from utils import rtr
 
 
 @login_required
-def new_transaction(request, account_slug):
+def create_transaction(request, account_slug):
+    """Create a new Transaction associated with a specified Account."""
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     form, trans = modelform_handler(request, TransactionForm, commit=False)
     if trans:
@@ -22,11 +23,12 @@ def new_transaction(request, account_slug):
         return redirect(trans.account)
 
     data = {'account': account, 'form': form, 'transaction': trans}
-    return rtr(request, 'moneybags/new_transaction.html', data)
+    return rtr(request, 'moneybags/create_transaction.html', data)
 
 
 @login_required
 def recurring_transaction(request, account_slug, transaction_id):
+    """Create or Update a RecurringTransaction, given a Transaction's `id`."""
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     transaction = get_object_or_404(Transaction, pk=transaction_id,
         account=account)
@@ -46,8 +48,9 @@ def recurring_transaction(request, account_slug, transaction_id):
 
 
 @login_required
-def edit_recurring_transaction(request, account_slug,
-                               recurring_transaction_id):
+def update_recurring_transaction(request, account_slug,
+                                 recurring_transaction_id):
+    """Update a RecurringTransaction."""
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     recurring_transaction = get_object_or_404(RecurringTransaction,
         pk=recurring_transaction_id, account=account)
@@ -66,17 +69,18 @@ def edit_recurring_transaction(request, account_slug,
         'form': form,
         'recurring_transaction': recurring_transaction
     }
-    return rtr(request, 'moneybags/edit_recurring_transaction.html', data)
+    return rtr(request, 'moneybags/update_recurring_transaction.html', data)
 
 
 @login_required
-def account_list(request):
+def list_accounts(request):
+    """Lists Accounts owned by the authenticated User."""
     data = {'accounts': Account.objects.filter(owner=request.user)}
-    return rtr(request, 'moneybags/account_list.html', data)
+    return rtr(request, 'moneybags/list_accounts.html', data)
 
 
 @login_required
-def account_create(request):
+def create_account(request):
     """Create a new ``Account`` owned by the authenticated User."""
     form, acct = modelform_handler(request, AccountForm, commit=False)
     if acct:
@@ -84,11 +88,11 @@ def account_create(request):
         acct.save()
         return redirect(acct)
     data = {'form': form}
-    return rtr(request, 'moneybags/account_create.html', data)
+    return rtr(request, 'moneybags/create_account.html', data)
 
 
 @login_required
-def account_detail(request, account_slug):
+def detail_account(request, account_slug):
     """List recent debits, credits, and any upcoming recurring transactions."""
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     balance = account.get_balance()
@@ -126,17 +130,17 @@ def account_detail(request, account_slug):
         'today': today,
         'transactions': transactions,
     }
-    return rtr(request, 'moneybags/account_detail.html', data)
+    return rtr(request, 'moneybags/detail_account.html', data)
 
 
 @login_required
-def account_update(request, account_slug):
-    """Handle POST from account_detail, and update selected transactions:
+def update_transactions(request, account_slug):
+    """Update one or more Transactions for the given Account. The types of
+    updates may include:
 
-    - delete
-    - set as pending/not pending
+    - deleting transactions
+    - changes to pending status.
 
-    Then redirect to account detail.
     """
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
 
@@ -166,7 +170,7 @@ def account_update(request, account_slug):
 
 
 @login_required
-def transaction_detail(request, account_slug, transaction_id):
+def detail_transaction(request, account_slug, transaction_id):
     """Show all the details associated with a single Transaction."""
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     transaction = get_object_or_404(Transaction, account=account,
@@ -178,4 +182,4 @@ def transaction_detail(request, account_slug, transaction_id):
         'transaction': transaction,
         'similar_transactions': similar_transactions
     }
-    return rtr(request, 'moneybags/transaction_detail.html', data)
+    return rtr(request, 'moneybags/detail_transaction.html', data)

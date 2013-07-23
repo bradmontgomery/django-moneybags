@@ -32,11 +32,11 @@
         </table>
     {% endif %}
 
-    <p>&rarr; <a href="{% url 'moneybags-new-transaction' account.slug %}">Enter a Transaction</a></p>
+    <p>&rarr; <a href="{% url 'moneybags-create-transaction' account.slug %}">Enter a Transaction</a></p>
 
     {% if transactions %}
         <div id="balance"{% if overdrawn %}class="overdrawn"{% endif %}><em>Balance:</em> {{ balance }}</div>
-        <form action="{% url 'moneybags-account-update' account.slug %}" method="post">{% csrf_token %}
+        <form action="{% url 'moneybags-update-transactions' account.slug %}" method="post">{% csrf_token %}
         {{ formset.management_form }}
         <table>
         <caption>Recent Transactions</caption>
@@ -99,7 +99,7 @@
             <p>You currently have no transactions.</p>
         {% endif %}
     {% endif %}
-    <p>&rarr; <a href="{% url 'moneybags-new-transaction' account.slug %}">Enter a Transaction</a></p>
+    <p>&rarr; <a href="{% url 'moneybags-create-transaction' account.slug %}">Enter a Transaction</a></p>
 
 {% endblock %}
 

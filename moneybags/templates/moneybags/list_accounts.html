@@ -3,7 +3,7 @@
 
 {% block content %}
     <h2>Accounts</h2>
-    <p>&rarr; <a href="{% url 'moneybags-account-create' %}">Create an Account</a></p>
+    <p>&rarr; <a href="{% url 'moneybags-create-account' %}">Create an Account</a></p>
     {% if accounts %}
         <table>
         <caption>Accounts &amp; Balances</caption>
@@ -23,7 +23,7 @@
         </tbody>
         </table>
     {% else %}
-        <p>You haven't set up any Accounts yet.  <a href="{% url 'moneybags-account-create' %}">Create One</a>!</p>
+        <p>You haven't set up any Accounts yet.  <a href="{% url 'moneybags-create-account' %}">Create One</a>!</p>
     {% endif %}
 
 {% endblock %}
