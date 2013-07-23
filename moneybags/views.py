@@ -2,7 +2,6 @@ from datetime import date, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.forms.formsets import formset_factory
-from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 
 from models import Account, Transaction, RecurringTransaction
@@ -14,15 +13,15 @@ from utils import rtr
 @login_required
 def new_transaction(request, account_slug):
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
-    form, object = modelform_handler(request, TransactionForm, commit=False)
-    if object:
-        object.account = account
-        object.save()
-        if object.recurring:
-            return redirect(object.get_recurring_transaction_url())
-        return redirect(object.account)
+    form, trans = modelform_handler(request, TransactionForm, commit=False)
+    if trans:
+        trans.account = account
+        trans.save()
+        if trans.recurring:
+            return redirect(trans.get_recurring_transaction_url())
+        return redirect(trans.account)
 
-    data = {'account': account, 'form': form, 'object': object}
+    data = {'account': account, 'form': form, 'transaction': trans}
     return rtr(request, 'moneybags/new_transaction.html', data)
 
 
@@ -33,16 +32,16 @@ def recurring_transaction(request, account_slug, transaction_id):
         account=account)
     recurring_transaction = transaction.get_recurring_transaction()
 
-    if recurring_transaction:
-        form, object = modelform_handler(request, RecurringTransactionForm,
-            instance=recurring_transaction, commit=True)
-        if object:
-            return redirect(object)
+    form, updated_transaction = modelform_handler(
+        request,
+        RecurringTransactionForm,
+        instance=recurring_transaction,
+        commit=True
+    )
+    if updated_transaction:  # Transaction was updated, redirect to it.
+        return redirect(updated_transaction)
 
-        data = {'account': account, 'form': form, 'transaction': transaction}
-    else:
-        raise Http404
-
+    data = {'account': account, 'transaction': transaction, 'form': form}
     return rtr(request, 'moneybags/recurring_transaction.html', data)
 
 
@@ -53,27 +52,26 @@ def edit_recurring_transaction(request, account_slug,
     recurring_transaction = get_object_or_404(RecurringTransaction,
         pk=recurring_transaction_id, account=account)
 
-    if recurring_transaction:
-        form, object = modelform_handler(request, RecurringTransactionForm,
-            instance=recurring_transaction, commit=True)
-        if object:
-            return redirect(object)
+    form, updated_transaction = modelform_handler(
+        request,
+        RecurringTransactionForm,
+        instance=recurring_transaction,
+        commit=True
+    )
+    if updated_transaction:  # Transaction was updated, redirect to it.
+        return redirect(updated_transaction)
 
-        data = {
-            'account': account,
-            'form': form,
-            'recurring_transaction': recurring_transaction
-        }
-    else:
-        raise Http404
-
+    data = {
+        'account': account,
+        'form': form,
+        'recurring_transaction': recurring_transaction
+    }
     return rtr(request, 'moneybags/edit_recurring_transaction.html', data)
 
 
 @login_required
 def account_list(request):
-    moneybags = Account.objects.filter(owner=request.user)
-    data = {'moneybags': moneybags}
+    data = {'accounts': Account.objects.filter(owner=request.user)}
     return rtr(request, 'moneybags/account_list.html', data)
 
 
@@ -84,16 +82,14 @@ def account_create(request):
     if acct:
         acct.owner = request.user
         acct.save()
-        return redirect(object)
+        return redirect(acct)
     data = {'form': form}
     return rtr(request, 'moneybags/account_create.html', data)
 
 
 @login_required
 def account_detail(request, account_slug):
-    """
-    List "recent" debits, credits, and any "upcoming" recurring transactions
-    """
+    """List recent debits, credits, and any upcoming recurring transactions."""
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     balance = account.get_balance()
 
@@ -120,23 +116,27 @@ def account_detail(request, account_slug):
     initial_data = [{'value':False, 'object_id':t.id} for t in transactions]
     formset = TransactionFormSet(initial=initial_data)
 
-    data = {'account': account, 'transactions': transactions,
-            'recurring_transactions': recurring_transactions,
-            'today': today, 'since': since, 'balance': balance,
-            'overdrawn': not balance > 0, 'formset': formset,
-           }
+    data = {
+        'account': account,
+        'balance': balance,
+        'formset': formset,
+        'overdrawn': not balance > 0,
+        'recurring_transactions': recurring_transactions,
+        'since': since,
+        'today': today,
+        'transactions': transactions,
+    }
     return rtr(request, 'moneybags/account_detail.html', data)
 
 
 @login_required
 def account_update(request, account_slug):
-    """
-    Handle POST from account_detail, and update selected transactions:
+    """Handle POST from account_detail, and update selected transactions:
 
     - delete
     - set as pending/not pending
 
-    Then redirect to account detail
+    Then redirect to account detail.
     """
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
 
@@ -149,9 +149,10 @@ def account_update(request, account_slug):
 
         if action and formset.is_valid():
             cleaned_data = formset.cleaned_data
-            # Cleaned data is a list of dicts of the form:
-            # {'object_id':X, 'value':False }
-            # We need to perform the action on the objects whose val's are True
+            # Cleaned data is a list of dictionaries of the form:
+            #   {'object_id':X, 'value':False }
+            #
+            # Perform the action on the objects whose values are `True`
             ids = [d['object_id'] for d in cleaned_data if d['value']]
 
             # NOTE: the following perform BULK operations, so they don't
@@ -166,9 +167,7 @@ def account_update(request, account_slug):
 
 @login_required
 def transaction_detail(request, account_slug, transaction_id):
-    """
-    Show all the details associated with a single Transaction.
-    """
+    """Show all the details associated with a single Transaction."""
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     transaction = get_object_or_404(Transaction, account=account,
         id=transaction_id)

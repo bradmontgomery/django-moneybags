@@ -43,8 +43,9 @@ def modelform_handler(request, form_klass, instance=None, commit=True):
     Returns a tuple: (``form``, ``object``) where ``form`` is
     and instance of ``form_klass`` and ``object`` is the result
     of calling ``form.save()`` or ``None``.
+
     """
-    object = None
+    obj = None
 
     if request.method == "POST":
         if instance:
@@ -53,11 +54,11 @@ def modelform_handler(request, form_klass, instance=None, commit=True):
             form = form_klass(request.POST)
 
         if form.is_valid():
-            object = form.save(commit=commit)
+            obj = form.save(commit=commit)
     else:
         if instance:
             form = form_klass(instance=instance)
         else:
             form = form_klass()
 
-    return (form, object)
+    return (form, obj)

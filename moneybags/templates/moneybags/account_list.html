@@ -4,7 +4,7 @@
 {% block content %}
     <h2>Accounts</h2>
     <p>&rarr; <a href="{% url 'moneybags-account-create' %}">Create an Account</a></p>
-    {% if moneybags %}
+    {% if accounts %}
         <table>
         <caption>Accounts &amp; Balances</caption>
         <thead>
@@ -14,7 +14,7 @@
             </tr>
         </thead>
         <tbody>
-        {% for account in moneybags %}
+        {% for account in accounts %}
             <tr>
             <td><a href="{{ account.get_absolute_url }}">{{ account }}</a></td>
             <td>{{ account.get_balance }}</td>
