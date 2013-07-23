@@ -3,10 +3,18 @@
 
 {% block content %}
 
-    <h2>{{ account }}</h2>
+    <h1>{{ account }} <small id="balance"
+        class="{% if overdrawn %}text-error{% else %}text-info{% endif %}">
+        Balance: {{ balance }}</small>
+    </h1>
+
+    <div class="clearfix">
+    <a href="{% url 'moneybags-create-transaction' account.slug %}"
+       class="pull-right btn btn-primary">New Transaction</a>
+    </div>
     {% if recurring_transactions %}
-        <table>
-        <caption>Upcoming Recurring Transactions</caption>
+        <table class="table table-striped">
+        <caption class="lead">Upcoming Recurring Transactions</caption>
         <thead>
             <tr>
             <th class="type">Type</th>
@@ -19,27 +27,37 @@
         </thead>
         <tbody>
         {% for rt in recurring_transactions %}
-            <tr class="{% cycle '' 'alternate ' %}{{ rt.get_type }}">
-            <td>{{ rt.get_transaction_type_display }}</td>
+            <tr class="{{ rt.get_type }}{% if rt.pending %} muted{% endif %}">
+            <td>
+                {% with t=rt.get_transaction_type_display %}
+                    {% if t == "Credit" %}
+                        <span class="label label-success">Credit</span>
+                    {% elif t == "Debit" %}
+                        <span class="label label-important">Debit</span>
+                    {% else %}
+                        <span class="label">unknown</span>
+                    {% endif %}
+                {% endwith %}
+            </td>
             <td>{{ rt.last_transaction_date|date:"M n, Y" }}</td>
             <td>{{ rt.get_frequency_display }}</td>
             <td><a href="{{ rt.get_edit_url }}">{{ rt.description }}</a></td>
             <td>{{ rt.due_date|date:"M n, Y" }}</td>
-            <td>{{ rt.amount }}</td>
+            <td>$ {{ rt.amount|floatformat:2 }}</td>
             </tr>
         {% endfor %}
         </tbody>
         </table>
+        <hr/>
     {% endif %}
 
-    <p>&rarr; <a href="{% url 'moneybags-create-transaction' account.slug %}">Enter a Transaction</a></p>
 
     {% if transactions %}
-        <div id="balance"{% if overdrawn %}class="overdrawn"{% endif %}><em>Balance:</em> {{ balance }}</div>
-        <form action="{% url 'moneybags-update-transactions' account.slug %}" method="post">{% csrf_token %}
+        <form action="{% url 'moneybags-update-transactions' account.slug %}"
+              method="post">{% csrf_token %}
         {{ formset.management_form }}
-        <table>
-        <caption>Recent Transactions</caption>
+        <table class="table table-striped">
+        <caption class="lead">Recent Transactions</caption>
         <thead>
             <tr>
             <th>&nbsp;</th>
@@ -49,28 +67,36 @@
             <th class="description">Description</th>
             <th class="amount">Amount</th>
             </tr>
+
+            {% comment %}
             <tr>
             <td class="selectall"></td>
             <td colspan="5">
-            <button type="submit" id="id_remove_pending" name="action" value="remove-pending">Remove Pending</button>
-            <button type="submit" id="id_delete" name="action" value="delete">Delete</button>
+            <button type="submit" id="id_remove_pending" name="action" value="remove-pending" class="btn">Remove Pending</button>
+            <button type="submit" id="id_delete" name="action" value="delete" class="btn">Delete</button>
             </td>
             </tr>
+            {% endcomment %}
         </thead>
 
         <tfoot>
             <tr>
             <td class="selectall"></td>
             <td colspan="5">
-            <button type="submit" id="id_remove_pending" name="action" value="remove-pending">Remove Pending</button>
-            <button type="submit" id="id_delete" name="action" value="delete">Delete</button>
+            <button type="submit" id="id_remove_pending" name="action"
+                    value="remove-pending" class="btn btn-info">Remove Pending</button>
+            <button type="submit" id="id_delete" name="action" value="delete"
+                    class="btn btn-danger">Delete</button>
             </td>
             </tr>
         </tfoot>
 
         <tbody>
         {% for t in transactions %}
-            <tr class="{% cycle '' 'alternate ' %}transaction {% if t.is_credit %}credit{% else %}debit{% endif %} {% if t.recurring %}recurring{% endif %} {% if t.pending %}pending{% endif %}">
+            <tr class="transaction {% if t.is_credit %}credit{% else %}debit{% endif %}
+            {% if t.recurring %}recurring{% endif %} {% if t.pending %}pending muted{% endif %}">
+
+            {# Checkbox from the formset #}
             <td>
                 {% for form in formset.forms %}
                     {% ifequal form.initial.object_id t.id %}
@@ -80,11 +106,45 @@
                     {% endifequal %}
                 {% endfor %}
             </td>
-            <td>{% if t.is_credit %}Credit{% else %}Debit{% endif %}</td>
-            <td>{{ t.date|date:"M n, Y" }}</td>
-            <td>{% if t.check_no %}{{ t.check_no }}{% else %}{% endif %}</td>
-            <td><a href="{{ t.get_absolute_url }}">{{ t.description }}</a></td>
-            <td>{% if t.is_credit %}({{ t.amount }}){% else %}{{ t.abs_amount }}{% endif %}</td>
+
+            {# Transaction Type #}
+            <td>
+                {% if t.is_credit %}
+                    <span class="label label-success">Credit</span>
+                {% else %}
+                    <span class="label label-important">Debit</span>
+                {% endif %}
+                {% if t.recurring %}
+                    <span class="label label-info">Recurring</span>
+                {% endif %}
+                {% if t.pending %}
+                    <span class="label">Pending</span>
+                {% endif %}
+            </td>
+
+            {# Transaction Date #}
+            <td>
+                {{ t.date|date:"M n, Y" }}
+            </td>
+
+            {# Check number if appropriate #}
+            <td>
+                {% if t.check_no %}{{ t.check_no }}{% else %}{% endif %}
+            </td>
+
+            {# Description #}
+            <td>
+                <a href="{{ t.get_absolute_url }}">{{ t.description }}</a>
+            </td>
+
+            {# Amount #}
+            <td>
+                {% if t.is_credit %}
+                    $ ({{ t.amount|floatformat:2 }})
+                {% else %}
+                    $ {{ t.abs_amount|floatformat:2 }}
+                {% endif %}
+            </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -92,14 +152,10 @@
         </form>
     {% else %}
         {% if balance %}
-            {# There have obviously been *some* transactions, just not recently #}
-            <div id="balance"{% if overdrawn %}class="overdrawn"{% endif %}><em>Balance:</em> {{ balance }}</div>
+            {# There have been *some* transactions, just not recently #}
             <p>You don't have any recent transactions.</p>
         {% else %}
             <p>You currently have no transactions.</p>
         {% endif %}
     {% endif %}
-    <p>&rarr; <a href="{% url 'moneybags-create-transaction' account.slug %}">Enter a Transaction</a></p>
-
 {% endblock %}
-

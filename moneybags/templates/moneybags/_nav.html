@@ -1,0 +1,8 @@
+{% load url from future %}
+<a class="brand" href="{% url 'moneybags-default' %}">Moneybags</a>
+<div class="nav-collapse collapse">
+<ul class="nav">
+  <li><a href="{% url 'moneybags-create-account' %}">Create Account</a></li>
+  <li><a href="{% url 'moneybags-list-accounts' %}">List Accounts</a></li>
+</ul>
+</div><!--/.nav-collapse -->

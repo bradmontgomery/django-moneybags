@@ -2,11 +2,9 @@
 {% load url from future %}
 
 {% block content %}
-    <h2>Accounts</h2>
-    <p>&rarr; <a href="{% url 'moneybags-create-account' %}">Create an Account</a></p>
+    <h1>Accounts &amp; Balances</h1>
     {% if accounts %}
-        <table>
-        <caption>Accounts &amp; Balances</caption>
+        <table class="table">
         <thead>
             <tr>
             <th>Account</th>
@@ -23,8 +21,7 @@
         </tbody>
         </table>
     {% else %}
-        <p>You haven't set up any Accounts yet.  <a href="{% url 'moneybags-create-account' %}">Create One</a>!</p>
+        <p>You haven't set up any Accounts yet. Go ahead,
+        <a href="{% url 'moneybags-create-account' %}">Create One</a>!</p>
     {% endif %}
-
 {% endblock %}
-
