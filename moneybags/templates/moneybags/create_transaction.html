@@ -1,15 +1,18 @@
 {% extends "moneybags/base.html" %}
 {% load url from future %}
+{% load bootstrap_tags %}
 
 {% block content %}
-    <h2>{{ account }}: New Transaction</h2>
+    <h1>{{ account }} <small>New Transaction</small></h1>
+
     {% if form %}
-    <form action="{% url 'moneybags-create-transaction' account.slug %}" method="post">{% csrf_token %}
+    <form action="{% url 'moneybags-create-transaction' account.slug %}"
+          method="post" class="form-horizontal">{% csrf_token %}
     <fieldset><legend>New Transaction</legend>
-    <ul>
-    {{ form.as_ul }}
-    <li class="submitbutton"><input type="submit" value="Save"/></li>
-    </ul>
+        {{ form|as_bootstrap }}
+        <div class="form-actions">
+        <input type="submit" class="btn btn-primary" value="Save"/>
+        </div>
     </fieldset>
     </form>
     {% endif %}

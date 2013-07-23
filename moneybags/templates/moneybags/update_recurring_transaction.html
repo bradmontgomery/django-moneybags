@@ -1,22 +1,26 @@
 {% extends "moneybags/base.html" %}
 {% load url from future %}
+{% load bootstrap_tags %}
 
 {% block content %}
-    <h2>{{ account }}: Recurring Transaction</h2>
+    <h1>{{ account }} <small>Recurring Transaction</small></h1>
 
-    <p class="notice">
-    You're updating a <em>Recurring {{ recurring_transaction.get_transaction_type_display }}</em> called
-    <strong>{{ recurring_transaction.description }}</strong>. This will automatically show up in your
-    account as a <em>Pending</em> transaction after the designated amount of time.
+    <p class="alert">
+    You're updating a <em>Recurring
+    {{ recurring_transaction.get_transaction_type_display }}</em> called
+    <strong>{{ recurring_transaction.description }}</strong>. This will
+    automatically show up in your account as a <em>Pending</em>
+    transaction after the designated amount of time.
     </p>
 
     {% if form %}
-    <form action="{{ recurring_transaction.get_edit_url }}" method="post">{% csrf_token %}
+    <form action="{{ recurring_transaction.get_edit_url }}"
+          method="post" class="form-horizontal">{% csrf_token %}
     <fieldset><legend>{{ recurring_transaction.description }}</legend>
-    <ul>
-    {{ form.as_ul }}
-    <li class="submitbutton"><input type="submit" value="Save"/></li>
-    </ul>
+        {{ form|as_bootstrap }}
+        <div class="form-actions">
+        <input type="submit" class="btn btn-primary" value="Save"/>
+        </div>
     </fieldset>
     </form>
     {% endif %}

@@ -5,7 +5,7 @@
 
     <h1>{{ account }} <small id="balance"
         class="{% if overdrawn %}text-error{% else %}text-info{% endif %}">
-        Balance: {{ balance }}</small>
+        Balance: $ {{ balance|floatformat:2 }}</small>
     </h1>
 
     <div class="clearfix">
