@@ -3,12 +3,12 @@ from datetime import date, timedelta
 from django.contrib.auth.decorators import login_required
 from django.forms.formsets import formset_factory
 from django.http import Http404
-from django.shortcuts import render_to_response, get_object_or_404, redirect
-from django.template import RequestContext
+from django.shortcuts import get_object_or_404, redirect
 
 from models import Account, Transaction, RecurringTransaction
 from forms import AccountForm, TransactionForm, TransactionCheckBoxForm
 from forms import RecurringTransactionForm, modelform_handler
+from utils import rtr
 
 
 @login_required
@@ -23,9 +23,7 @@ def new_transaction(request, account_slug):
         return redirect(object.account)
 
     data = {'account': account, 'form': form, 'object': object}
-    return render_to_response('moneybags/new_transaction.html',
-                               data,
-                               context_instance=RequestContext(request))
+    return rtr(request, 'moneybags/new_transaction.html', data)
 
 
 @login_required
@@ -45,9 +43,7 @@ def recurring_transaction(request, account_slug, transaction_id):
     else:
         raise Http404
 
-    return render_to_response('moneybags/recurring_transaction.html',
-                               data,
-                               context_instance=RequestContext(request))
+    return rtr(request, 'moneybags/recurring_transaction.html', data)
 
 
 @login_required
@@ -71,30 +67,26 @@ def edit_recurring_transaction(request, account_slug,
     else:
         raise Http404
 
-    return render_to_response('moneybags/edit_recurring_transaction.html',
-                               data,
-                               context_instance=RequestContext(request))
+    return rtr(request, 'moneybags/edit_recurring_transaction.html', data)
 
 
 @login_required
 def account_list(request):
     moneybags = Account.objects.filter(owner=request.user)
-    return render_to_response('moneybags/account_list.html',
-                               {'moneybags': moneybags},
-                               context_instance=RequestContext(request))
+    data = {'moneybags': moneybags}
+    return rtr(request, 'moneybags/account_list.html', data)
 
 
 @login_required
 def account_create(request):
-    """ create a new account """
-    form, object = modelform_handler(request, AccountForm, commit=False)
-    if object:
-        object.owner = request.user
-        object.save()
+    """Create a new ``Account`` owned by the authenticated User."""
+    form, acct = modelform_handler(request, AccountForm, commit=False)
+    if acct:
+        acct.owner = request.user
+        acct.save()
         return redirect(object)
-    return render_to_response('moneybags/account_create.html',
-                               {'form': form},
-                               context_instance=RequestContext(request))
+    data = {'form': form}
+    return rtr(request, 'moneybags/account_create.html', data)
 
 
 @login_required
@@ -133,9 +125,7 @@ def account_detail(request, account_slug):
             'today': today, 'since': since, 'balance': balance,
             'overdrawn': not balance > 0, 'formset': formset,
            }
-    return render_to_response('moneybags/account_detail.html',
-                              data,
-                              context_instance=RequestContext(request))
+    return rtr(request, 'moneybags/account_detail.html', data)
 
 
 @login_required
@@ -189,6 +179,4 @@ def transaction_detail(request, account_slug, transaction_id):
         'transaction': transaction,
         'similar_transactions': similar_transactions
     }
-    return render_to_response('moneybags/transaction_detail.html',
-                              data,
-                              context_instance=RequestContext(request))
+    return rtr(request, 'moneybags/transaction_detail.html', data)

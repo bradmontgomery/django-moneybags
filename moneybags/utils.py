@@ -2,13 +2,23 @@ from collections import namedtuple
 from csv import reader
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from django.shortcuts import render_to_response
+from django.template import RequestContext
 from re import sub as regex_sub
 from sys import stdout
+
 
 from .settings import (
     TRANSACTION_TYPE_DEBIT,
     TRANSACTION_TYPE_CREDIT,
 )
+
+
+def rtr(request, template, data):
+    """A shortcut for ``render_to_response`` using ``RequestContext``."""
+    args = (template, data)
+    kwargs = {"context_instance": RequestContext(request)}
+    return render_to_response(*args, **kwargs)
 
 
 def load_csv_data(path_to_csv_file):
