@@ -51,7 +51,8 @@ def recurring_transaction(request, account_slug, transaction_id):
 
 
 @login_required
-def edit_recurring_transaction(request, account_slug, recurring_transaction_id):
+def edit_recurring_transaction(request, account_slug,
+                               recurring_transaction_id):
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     recurring_transaction = get_object_or_404(RecurringTransaction,
         pk=recurring_transaction_id, account=account)
