@@ -39,10 +39,10 @@
                     {% endif %}
                 {% endwith %}
             </td>
-            <td>{{ rt.last_transaction_date|date:"M n, Y" }}</td>
+            <td>{{ rt.last_transaction_date|date:"M j, Y" }}</td>
             <td>{{ rt.get_frequency_display }}</td>
             <td><a href="{{ rt.get_edit_url }}">{{ rt.description }}</a></td>
-            <td>{{ rt.due_date|date:"M n, Y" }}</td>
+            <td>{{ rt.due_date|date:"M j, Y" }}</td>
             <td>$ {{ rt.amount|floatformat:2 }}</td>
             </tr>
         {% endfor %}
@@ -124,7 +124,7 @@
 
             {# Transaction Date #}
             <td>
-                {{ t.date|date:"M n, Y" }}
+                {{ t.date|date:"M j, Y" }}
             </td>
 
             {# Check number if appropriate #}
