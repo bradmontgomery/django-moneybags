@@ -150,6 +150,30 @@
         </tbody>
         </table>
         </form>
+
+        {# ---------------- Pagination ----------------------- #}
+        <div class="pagination pagination-centered">
+        <ul>
+        {% if transactions.has_previous %}
+            <li><a href="?page={{transactions.previous_page_number}}">Prev</a></li>
+        {% else %}
+            <li class="disabled"><a href="#">Prev</a></li>
+        {% endif %}
+
+        {% for p in transactions.paginator.page_range %}
+            <li><a{% if p == transactions.number %} class="active"{% endif %}
+                  href="?page={{ p }}">{{ p }}</a></li>
+        {% endfor %}
+
+        {% if transactions.has_next %}
+            <li><a href="?page={{transactions.next_page_number}}">Next</a></li>
+        {% else %}
+            <li class="disabled"><a href="#">Next</a></li>
+        {% endif %}
+        </ul>
+        </div>
+        {# ------------- End Pagination ----------------------- #}
+
     {% else %}
         {% if balance %}
             {# There have been *some* transactions, just not recently #}

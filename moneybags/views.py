@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect
 from models import Account, Transaction, RecurringTransaction
 from forms import AccountForm, TransactionForm, TransactionCheckBoxForm
 from forms import RecurringTransactionForm, modelform_handler
-from utils import rtr
+from utils import paginate_queryset, rtr
 
 
 @login_required
@@ -118,6 +118,9 @@ def detail_account(request, account_slug):
     TransactionFormSet = formset_factory(TransactionCheckBoxForm, extra=0)
     initial_data = [{'value': False, 'object_id': t.id} for t in transactions]
     formset = TransactionFormSet(initial=initial_data)
+
+    # Paginate the list of Transactions
+    transactions = paginate_queryset(request, transactions)
 
     data = {
         'account': account,
