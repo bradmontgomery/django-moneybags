@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 from django.contrib.auth.decorators import login_required
 from django.forms.formsets import formset_factory
@@ -97,27 +97,26 @@ def detail_account(request, account_slug):
     account = get_object_or_404(Account, slug=account_slug, owner=request.user)
     balance = account.get_balance()
 
-    # Display the 30 days worth of transactions.
     today = date.today()
-    since = timedelta(days=-30) + today
 
-    #TODO:
-    # for recurring transactions to automatically get dumped into the
-    # "Transaction" list, we've got to run the
-    # ``moneybags_create_transactions_due_today`` Management command.  Now,
-    # that'll create a Transaction based on RecurringTranscations,
+    # TODO: for recurring transactions to automatically get dumped into the
+    # "Transaction" list, we've got to run the ``create_transactions``
+    # Management command.  Now, that'll create a Transaction based on
+    # RecurringTranscations,
     #
     # BUT, the recurringTransaction will still have the wrong date. Either the
     # model, or the managment command needs to update it's due date,
-    transactions = Transaction.objects.filter(date__gte=since, account=account)
-    transactions = transactions.order_by('-date', 'id')
+
+    transactions = Transaction.objects.filter(account=account)
     recurring_transactions = RecurringTransaction.objects.filter(
-        due_date__gte=today, account=account).order_by('-due_date', 'id')
+        due_date__gte=today,
+        account=account
+    )
 
     # Create a FormSet using a TransactionCheckBoxForm for each Transaction
     # listed.
     TransactionFormSet = formset_factory(TransactionCheckBoxForm, extra=0)
-    initial_data = [{'value':False, 'object_id':t.id} for t in transactions]
+    initial_data = [{'value': False, 'object_id': t.id} for t in transactions]
     formset = TransactionFormSet(initial=initial_data)
 
     data = {
@@ -126,7 +125,6 @@ def detail_account(request, account_slug):
         'formset': formset,
         'overdrawn': not balance > 0,
         'recurring_transactions': recurring_transactions,
-        'since': since,
         'today': today,
         'transactions': transactions,
     }
