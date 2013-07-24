@@ -13,38 +13,37 @@
        class="pull-right btn btn-primary">New Transaction</a>
     </div>
     {% if recurring_transactions %}
-        <table class="table table-striped">
+        <table class="table tabled-border">
         <caption class="lead">Upcoming Recurring Transactions</caption>
         <thead>
             <tr>
             <th class="type">Type</th>
-            <th class="date">Last Transaction</th>
+            <th class="date">Due</th>
             <th class="freq">Frequency</th>
             <th class="description">Description</th>
-            <th class="date">Due Date</th>
             <th class="amount">Amount</th>
             </tr>
         </thead>
         <tbody>
         {% for rt in recurring_transactions %}
-            <tr class="{{ rt.get_type }}{% if rt.pending %} muted{% endif %}">
+            {% with t=rt.get_type %}
+            <tr class="{% if t == "credit" %}success{% elif t == "debit" %}error{% endif %}
+                       {{ type }}">
             <td>
-                {% with t=rt.get_transaction_type_display %}
-                    {% if t == "Credit" %}
-                        <span class="label label-success">Credit</span>
-                    {% elif t == "Debit" %}
-                        <span class="label label-important">Debit</span>
-                    {% else %}
-                        <span class="label">unknown</span>
-                    {% endif %}
-                {% endwith %}
+                {% if t == "credit" %}
+                    <span class="label label-success">Credit</span>
+                {% elif t == "debit" %}
+                    <span class="label label-important">Debit</span>
+                {% else %}
+                    <span class="label">unknown</span>
+                {% endif %}
             </td>
-            <td>{{ rt.last_transaction_date|date:"M j, Y" }}</td>
+            <td>{{ rt.due_date|date:"M j, Y" }}</td>
             <td>{{ rt.get_frequency_display }}</td>
             <td><a href="{{ rt.get_edit_url }}">{{ rt.description }}</a></td>
-            <td>{{ rt.due_date|date:"M j, Y" }}</td>
-            <td>$ {{ rt.amount|floatformat:2 }}</td>
+            <td><strong>{{ rt.amount|floatformat:2 }}</strong></td>
             </tr>
+            {% endwith %}
         {% endfor %}
         </tbody>
         </table>
@@ -140,9 +139,9 @@
             {# Amount #}
             <td>
                 {% if t.is_credit %}
-                    $ ({{ t.amount|floatformat:2 }})
+                    ({{ t.amount|floatformat:2 }})
                 {% else %}
-                    $ {{ t.abs_amount|floatformat:2 }}
+                    {{ t.abs_amount|floatformat:2 }}
                 {% endif %}
             </td>
             </tr>
