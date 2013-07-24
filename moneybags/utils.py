@@ -2,6 +2,7 @@ from collections import namedtuple
 from csv import reader
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from re import sub as regex_sub
@@ -12,6 +13,29 @@ from .settings import (
     TRANSACTION_TYPE_DEBIT,
     TRANSACTION_TYPE_CREDIT,
 )
+
+
+def paginate_queryset(request, queryset, num_items=50, page_var='page'):
+    """Given a queryset of objects, return paginated results.
+
+    # ``request`` -- an HTTPRequest object; Used to retrieve given page numbers
+    * ``queryset`` -- a QuerySet of model objects (or any iterable)
+    * ``num_items`` -- the number of items to show, per page.
+    * ``page_var`` -- the name of the querystring variable for the given page
+
+    """
+    paginator = Paginator(queryset, num_items)
+    page = request.GET.get(page_var)
+    try:
+        # Generate the specified page of results
+        results = paginator.page(page)
+    except PageNotAnInteger:
+        # Generate the 1st page of results
+        results = paginator.page(1)
+    except EmptyPage:
+        # Generate the last page of results
+        results = paginator.page(paginator.num_pages)
+    return results
 
 
 def rtr(request, template, data):
