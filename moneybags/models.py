@@ -98,7 +98,7 @@ class Transaction(models.Model):
         )
 
     class Meta:
-        ordering = ['-date']
+        ordering = ['-date', 'check_no', 'description']
         verbose_name = 'Transaction'
         verbose_name_plural = 'Transaction'
 
@@ -190,7 +190,7 @@ class Transaction(models.Model):
             transaction_type=self.transaction_type,
             account=self.account
         )
-        transactions = transactions.exclude(id=self.id).order_by('-date')
+        transactions = transactions.exclude(id=self.id)
         return transactions
 
     admin_objects = models.Manager()
@@ -248,7 +248,10 @@ class RecurringTransaction(models.Model):
         )
 
     class Meta:
-        ordering = ['-last_transaction_date', 'account', 'description']
+        ordering = [
+            'account', '-last_transaction_date', 'transaction_type',
+            'description'
+        ]
         unique_together = ['account', 'desc_slug']
 
     def get_absolute_url(self):
