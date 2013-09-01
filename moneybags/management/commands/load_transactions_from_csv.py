@@ -8,10 +8,16 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-    args = "<username> <account_slug> <path_to_csv_file>"
+    args = "<username> <account_slug> <path_to_csv_file> [date_format]"
     help = """This command will load transactions from a CSV file.
 
-    You must provide a username and an Account slug.
+    You must provide a username and an Account slug, and you may provide
+    and optional `date_format` that will be passed to `datetime.strptime`.
+
+    NOTE on dates:
+        The default date format is "mm/dd/YYYY". If your CSV files use a
+        different format, this command will fail unless you pass in a valid
+        date format parsing string.
 
     Example Usage:
 
@@ -19,6 +25,14 @@ class Command(BaseCommand):
             jdoe
             personal-checking
             /home/users/jdoe/checking.csv
+
+    Or:
+
+        python manage.py load_transactions_from_csv
+            jane
+            business-account
+            ~/Desktop/business.csv
+            "%b %d, %Y:
 
     """
 
@@ -28,13 +42,20 @@ class Command(BaseCommand):
         self.username = None
         self.account_slug = None
         self.csv_file = None
+        self.date_format = None
 
     def _parse_args(self, args):
         """Unpack the arguments, storing values as attributes."""
         if len(args) == 3:
             self.username, self.account_slug, self.csv_file = args
+        elif len(args) == 4:
+            user, account, csv_file, date_format = args
+            self.username = user
+            self.account_slug = account
+            self.csv_file = csv_file
+            self.date_format = date_format
         else:
-            raise CommandError("This command requires exactly 3 arguments.")
+            raise CommandError("Invalid arguments: {0}".format(args))
 
     def _get_user(self):
         try:
@@ -56,5 +77,9 @@ class Command(BaseCommand):
         account = self._get_account()
 
         transactions = utils.load_csv_data(self.csv_file)
-        utils.create_transactions(account, transactions, verbose=True)
+        if self.date_format is None:
+            args = (account, transactions)
+        else:
+            args = (account, transactions, self.date_format)
+        utils.create_transactions(*args, verbose=True)
         self.stdout.write("\nDone!\n")

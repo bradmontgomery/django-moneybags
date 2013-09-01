@@ -80,7 +80,7 @@ def to_decimal(value, formatting_chars=['$', ',']):
     return value
 
 
-def create_transactions(account, transactions, date_format_string='%b %d, %Y',
+def create_transactions(account, transactions, date_format_string='%m/%d/%Y',
                         pending=True, verbose=False):
     """Create ``Transaction`` objects for the given Account and the given
     list of transaction data.
@@ -91,7 +91,7 @@ def create_transactions(account, transactions, date_format_string='%b %d, %Y',
     * ``pending`` -- (default is True) Whether or not to create pending
       Transactions
     * ``date_format_string`` -- used by strptime; the format to convert a
-      string into a datetime object. Default is '%b %d, %Y'
+      string into a datetime object. Default is '%m/%d/%Y'
     * ``verbose`` -- (default is False) Print info to stdout upon creation of
       each transaction.
 
