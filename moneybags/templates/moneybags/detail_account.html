@@ -156,18 +156,34 @@
         {% if transactions.has_previous %}
             <li><a href="?page={{transactions.previous_page_number}}">Prev</a></li>
         {% else %}
-            <li class="disabled"><a href="#">Prev</a></li>
+            <li class="disabled"><a name="Prev">Prev</a></li>
         {% endif %}
 
-        {% for p in transactions.paginator.page_range %}
-            <li><a{% if p == transactions.number %} class="active"{% endif %}
-                  href="?page={{ p }}">{{ p }}</a></li>
-        {% endfor %}
+        {% if transactions.paginator.num_pages > 25 %}
+          {% with page_range=transactions.paginator.page_range %}
+            {# Links to the first 10 pages ... #}
+            {% for p in page_range|slice:":10" %}
+                <li><a{% if p == transactions.number %} class="active"{% endif %}
+                      href="?page={{ p }}">{{ p }}</a></li>
+            {% endfor %}
+            <li class="disabled"><a name="...">...</a></li>
+            {# Links to the last 5 pages. #}
+            {% for p in page_range|slice:"-5:" %}
+                <li><a{% if p == transactions.number %} class="active"{% endif %}
+                      href="?page={{ p }}">{{ p }}</a></li>
+            {% endfor %}
+          {% endwith %}
+        {% else %}
+          {% for p in transactions.paginator.page_range %}
+              <li><a{% if p == transactions.number %} class="active"{% endif %}
+                    href="?page={{ p }}">{{ p }}</a></li>
+          {% endfor %}
+        {% endif %}
 
         {% if transactions.has_next %}
             <li><a href="?page={{transactions.next_page_number}}">Next</a></li>
         {% else %}
-            <li class="disabled"><a href="#">Next</a></li>
+            <li class="disabled"><a name="Next">Next</a></li>
         {% endif %}
         </ul>
         </div>
