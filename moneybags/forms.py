@@ -46,27 +46,47 @@ class TransactionReportForm(forms.Form):
         help_text="(optional) Match Transactions up to this date. "
                   "Format: mm/dd/YYY")
 
-    def get_matching_transactions(self):
-        """Do the query to get matching Transactions. This should only be
-        called after validation."""
+    def _cleaned_data_as_kwargs(self):
+        # Grab the claned data
         from_date = self.cleaned_data.get('from_date', None)
         to_date = self.cleaned_data.get('to_date', None)
         desc = self.cleaned_data['description']
         matching = self.cleaned_data['description_match']
 
-        transactions = Transaction.objects.all()
+        # Create a dict of kwargs to pass to an ORM filter
+        kwargs = {}
+
         if from_date:
-            transactions = transactions.filter(date__gte=from_date)
+            kwargs.update({'date__gte': from_date})
+
         if to_date:
-            transactions = transactions.filter(date__lte=to_date)
+            kwargs.update({'date__lte': to_date})
+
         if matching == "startswith":
-            transactions = transactions.filter(description__istartswith=desc)
+            kwargs.update({'description__istartswith': desc})
         elif matching == "endswith":
-            transactions = transactions.filter(date__iendswith=desc)
+            kwargs.update({'date__iendswith': desc})
         elif matching == "exact":
-            transactions = transactions.filter(date=desc)
+            kwargs.update({'date': desc})
         else:  # iexact
-            transactions = transactions.filter(date__iexact=desc)
+            kwargs.update({'date__iexact': desc})
+
+        return kwargs
+
+    def get_matching_transactions(self, fields=None):
+        """Do the query to get matching Transactions. This should only be
+        called after validation.
+
+        * fields - a tuple of fields to bass into the ORM's ``.values()``
+                   method. If provided, this should dramatically speed up
+                   queries.
+
+        """
+
+        kwargs = self._cleaned_data_as_kwargs()
+        transactions = Transaction.objects.filter(**kwargs)
+        if fields:
+            transactions = transactions.values(*fields)
         return transactions
 
 
