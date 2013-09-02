@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>{% block title %}Moneybags!{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <style type="text/css">
-    /* 60px to make the container go all the way to the bottom of the topbar */
-    body {padding-top: 60px;}
-    </style>
-    <link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
-    {% block extrahead %}{% endblock %}
-  </head>
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Moneybags!{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<style type="text/css">
+/* 60px to make the container go all the way to the bottom of the topbar */
+body {padding-top: 60px;}
+table > tbody > tr > th {width: 20%;}
+table > caption {text-align: left; margin: 20px 0 0 0; padding:0;}
+canvas {padding:0; margin:0 auto;}
+</style>
+<link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+{% block extrahead %}{% endblock %}
+</head>
 
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -34,5 +37,6 @@
 <!-- JS Placed at the end of the document so the pages load faster -->
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="{{ STATIC_URL }}bootstrap/js/bootstrap.min.js"></script>
+{% block endbody %}{% endblock %}
 </body>
 </html>
