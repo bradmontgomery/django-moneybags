@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 # /new/
 # /<account_slug>/update/
 # /<account_slug>/new/
+# /<account_slug>/report/
 # /<account_slug>/transaction/<transaction_id>/
 # /<account_slug>/recurring/<transaction_id>/
 # /<account_slug>/<transaction_id>/
@@ -29,6 +30,10 @@ urlpatterns = patterns('moneybags.views',
     url(r'^(?P<account_slug>.*)/new/$',
         'create_transaction',
         name='moneybags-create-transaction'),
+
+    url(r'^(?P<account_slug>.*)/report/$',
+        'transaction_report',
+        name='moneybags-transaction-report'),
 
     url(r'^(?P<account_slug>.*)/transaction/(?P<transaction_id>\d+)/$',
         'detail_transaction',

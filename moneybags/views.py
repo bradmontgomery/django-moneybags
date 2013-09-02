@@ -6,7 +6,8 @@ from django.shortcuts import get_object_or_404, redirect
 
 from models import Account, Transaction, RecurringTransaction
 from forms import AccountForm, TransactionForm, TransactionCheckBoxForm
-from forms import RecurringTransactionForm, modelform_handler
+from forms import RecurringTransactionForm, TransactionReportForm
+from forms import modelform_handler
 from utils import paginate_queryset, rtr
 
 
@@ -24,6 +25,21 @@ def create_transaction(request, account_slug):
 
     data = {'account': account, 'form': form, 'transaction': trans}
     return rtr(request, 'moneybags/create_transaction.html', data)
+
+
+@login_required
+def transaction_report(request, account_slug):
+    account = get_object_or_404(Account, slug=account_slug, owner=request.user)
+    transactions = None
+    if request.method == "POST":
+        form = TransactionReportForm(request.POST)
+        if form.is_valid():
+            transactions = form.get_matching_transactions()
+    else:
+        form = TransactionReportForm()
+
+    data = {'account': account, 'form': form, 'transactions': transactions}
+    return rtr(request, 'moneybags/transaction_report.html', data)
 
 
 @login_required

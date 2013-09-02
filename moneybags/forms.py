@@ -28,6 +28,48 @@ class TransactionCheckBoxForm(forms.Form):
     object_id = forms.IntegerField(required=True, widget=forms.HiddenInput)
 
 
+class TransactionReportForm(forms.Form):
+    """This form lets us view ``Transactions`` matching certain criteria."""
+    MATCHING_OPTIONS = [
+        ('iexact', ''),
+        ('startswith', 'Starts With'),
+        ('endswith', 'Ends With'),
+        ('exact', 'Exact'),
+    ]
+    description = forms.CharField(
+        help_text="Search for a Transaction Description")
+    description_match = forms.ChoiceField(choices=MATCHING_OPTIONS)
+    from_date = forms.DateField(required=False,
+        help_text="(optional) Match Transactions starting with this date. "
+                  "Format: mm/dd/YYY")
+    to_date = forms.DateField(required=False,
+        help_text="(optional) Match Transactions up to this date. "
+                  "Format: mm/dd/YYY")
+
+    def get_matching_transactions(self):
+        """Do the query to get matching Transactions. This should only be
+        called after validation."""
+        from_date = self.cleaned_data.get('from_date', None)
+        to_date = self.cleaned_data.get('to_date', None)
+        desc = self.cleaned_data['description']
+        matching = self.cleaned_data['description_match']
+
+        transactions = Transaction.objects.all()
+        if from_date:
+            transactions = transactions.filter(date__gte=from_date)
+        if to_date:
+            transactions = transactions.filter(date__lte=to_date)
+        if matching == "startswith":
+            transactions = transactions.filter(description__istartswith=desc)
+        elif matching == "endswith":
+            transactions = transactions.filter(date__iendswith=desc)
+        elif matching == "exact":
+            transactions = transactions.filter(date=desc)
+        else:  # iexact
+            transactions = transactions.filter(date__iexact=desc)
+        return transactions
+
+
 def modelform_handler(request, form_klass, instance=None, commit=True):
     """
     A convenience function to handle ModelForm creation and

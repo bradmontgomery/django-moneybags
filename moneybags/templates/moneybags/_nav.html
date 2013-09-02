@@ -4,5 +4,9 @@
 <ul class="nav">
   <li><a href="{% url 'moneybags-create-account' %}">Create Account</a></li>
   <li><a href="{% url 'moneybags-list-accounts' %}">List Accounts</a></li>
+  {% if account.slug %}
+    <li><a href="{% url 'moneybags-transaction-report' account.slug %}">
+    Reporting</a></li>
+  {% endif %}
 </ul>
 </div><!--/.nav-collapse -->
