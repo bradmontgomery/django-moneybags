@@ -18,7 +18,7 @@ User = get_user_model()
 class Account(models.Model):
     """A named container for Transactions, and is owned by a ``User``."""
     name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, db_index=True)
     owner = models.ForeignKey(User)
 
     def __unicode__(self):
@@ -74,20 +74,21 @@ class Transaction(models.Model):
         (TRANSACTION_TYPE_DEBIT, 'Debit'),
     )
     account = models.ForeignKey(Account)
-    date = models.DateField(help_text="The Date of this transaction")
+    date = models.DateField(db_index=True,
+        help_text="The Date of this transaction")
     check_no = models.PositiveIntegerField(blank=True, null=True,
         help_text="Optional: Check Number")
-    description = models.CharField(max_length=255,
+    description = models.CharField(max_length=255, db_index=True,
         help_text="Description for this Transaction")
     amount = models.DecimalField(max_digits=AMOUNT_MAX_DIGITS,
         decimal_places=AMOUNT_DECIMAL_PLACES,
         help_text="Amount of this Transaction")
-    recurring = models.BooleanField(blank=True, default=False,
+    recurring = models.BooleanField(blank=True, default=False, db_index=True,
         help_text="Is this a Recurring Transaction")
-    pending = models.BooleanField(blank=True, default=True,
+    pending = models.BooleanField(blank=True, default=True, db_index=True,
         help_text="Is this transaction still pending?")
     transaction_type = models.IntegerField(choices=TRANSACTION_TYPE,
-        help_text="The Type of Transaction")
+        db_index=True, help_text="The Type of Transaction")
     updated_on = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
@@ -302,7 +303,8 @@ def create_transactions_due_today():
     """
     for rt in RecurringTransaction.objects.due_today():
         # Make sure it doesn't already exist!
-        transactions = Transaction.objects.filter(date=rt.due_date,
+        transactions = Transaction.objects.filter(
+            date=rt.due_date,
             description=rt.description,
             amount=rt.amount,
             recurring=True,
