@@ -37,8 +37,8 @@
             <tr>
             <th>Date</th>
             <th>Check No</th>
+            <th>Description</th>
             <th>Amount</th>
-            <th>Updated On</th>
             </tr>
         </thead>
         <tbody>
@@ -46,8 +46,8 @@
             <tr{% if t.pending %} class="muted"{% endif %}>
             <td>{{ t.date|date:"M j, Y" }}</td>
             <td>{{ t.check_no|default:"&mdash;" }}</td>
+            <td>{{ t.description }}</td>
             <td>$ {{ t.amount|floatformat:2 }}</td>
-            <td>{{ t.updated_on|date:"M j, Y | g:ia" }}</td>
             </tr>
         {% endfor %}
         </tbody>

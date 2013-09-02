@@ -34,7 +34,8 @@ def transaction_report(request, account_slug):
     if request.method == "POST":
         form = TransactionReportForm(request.POST)
         if form.is_valid():
-            transactions = form.get_matching_transactions()
+            fields = ('date', 'check_no', 'description', 'amount')
+            transactions = form.get_matching_transactions(fields=fields)
     else:
         form = TransactionReportForm()
 
